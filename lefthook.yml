@@ -7,7 +7,7 @@ pre-commit:
       stage_fixed: true
 
     ast-grep-stubs:
-      run: npx --yes --package @ast-grep/cli ast-grep scan
+      run: npx --yes --package @ast-grep/cli@0.51.0 ast-grep scan
 
     ai-slop-regex:
       run: "! git diff --staged -U0 -- ':(exclude)*.md' | rg -i '\\b(as an ai language model|here is the (rest of the )?code|i hope this helps)\\b'"

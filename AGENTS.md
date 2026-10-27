@@ -9,7 +9,7 @@ Do not repeat global workflow rules here.
 - Documentation: Interactive Scalar API at `/reference`, OpenAPI spec at `/doc`
 - Validation: Zod 4 schemas via `createRoute` from `@hono/zod-openapi`
 - Code Quality: Biome (format & lint), Vitest, TypeScript strict mode
-- Task Runner: Universal Makefile (`setup`, `dev`, `test`, `lint`, `fix`, `typecheck`, `check`)
+- Task Runner: Universal Makefile (`setup`, `dev`, `test`, `lint`, `fix`, `typecheck`, `check`, `audit`)
 
 ## 2. Physical File Placement Rules
 - Transport Handlers: Thin route controllers in `src/api/routes/<feature>.ts`
@@ -19,7 +19,7 @@ Do not repeat global workflow rules here.
 - Test Suites: Sister-file colocated tests (`src/api/routes/<feature>.test.ts`)
 
 ## 3. Boundary & Routing Invariants
-- Direct access to `process.env` is strictly banned outside `src/core/config.ts` [review-only].
+- Direct access to `process.env` is strictly banned outside `src/core/config.ts` [enforced by ast-grep].
 - Contract-First Routing: Always define routes with `createRoute` specifying request/response schemas [review-only].
 - In tests, use in-memory `app.request()` rather than spinning up live network ports [enforced by test runner].
 
@@ -28,6 +28,6 @@ Run `make check` to verify task completion:
 1. Gate 1 (Typecheck): `bun run typecheck`
 2. Gate 2 (Lint & Format): `bun run lint`
 3. Gate 3 (Tests): `bun run test` (Vitest)
-4. Gate 4 (Dead Code): `bun run build` (tsc strict build)
+4. Gate 4 (Dead Code): `bunx knip@6.43.0`
 5. Gate 5 (Duplication): `npx --yes fallow@3.33.1 dupes --quiet --no-fragments`
-6. Gate 6 (Anti-Slop): `npx --yes --package @ast-grep/cli ast-grep scan`
+6. Gate 6 (Anti-Slop): `npx --yes --package @ast-grep/cli@0.51.0 ast-grep scan && ast-grep test`
