@@ -1,31 +1,35 @@
 {
   "name": "template-ts-backend",
-  "version": "0.1.0",
-  "description": "Universal TypeScript Backend API template with agentic quality guardrails and verification gates.",
+  "version": "1.0.0",
   "type": "module",
+  "description": "High-performance TypeScript backend template powered by Hono, OpenAPI 3.1, Zod 4, and Scalar",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "dev": "bun --watch src/index.ts",
+    "dev:node": "tsx watch src/node.ts",
     "build": "tsc -p tsconfig.build.json",
-    "start": "node dist/index.js",
+    "start": "bun src/index.ts",
+    "start:node": "node dist/node.js",
     "typecheck": "tsc --noEmit",
     "check:deadcode": "knip",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
-    "test": "vitest run"
+    "test": "vitest run",
+    "prepare": "node -e \"const fs=require('node:fs');if(fs.existsSync('.git')&&fs.existsSync('node_modules/lefthook'))require('node:child_process').execSync('lefthook install',{stdio:'inherit'})\""
   },
   "dependencies": {
-    "@hono/node-server": "^1.13.7",
-    "@hono/zod-openapi": "^0.19.10",
+    "@hono/node-server": "^2.1.5",
+    "@hono/zod-openapi": "^1.6.3",
     "@scalar/hono-api-reference": "^0.12.14",
-    "hono": "^4.6.14",
-    "zod": "^3.24.1"
+    "hono": "^4.13.14",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
-    "@types/node": "^22.10.2",
+    "@types/node": "^24.2.0",
     "knip": "^5.45.0",
-    "tsx": "^4.19.2",
-    "typescript": "^5.7.2",
-    "vitest": "^2.1.8"
-  }
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.7"
+  },
+  "packageManager": "bun@1.4.3"
 }

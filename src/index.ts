@@ -1,22 +1,10 @@
-import { serve } from "@hono/node-server";
 import { app } from "./app.js";
 import { config } from "./core/config.js";
 
-const server = serve(
-  {
-    fetch: app.fetch,
-    port: config.PORT,
-  },
-  (info) => {
-    console.log(`Server listening on http://localhost:${info.port}`);
-  },
-);
+console.log(`[Bun] Server listening on http://localhost:${config.PORT}`);
+console.log(`[Scalar Docs] http://localhost:${config.PORT}/reference`);
 
-const shutdown = () => {
-  server.close(() => {
-    process.exit(0);
-  });
+export default {
+  port: config.PORT,
+  fetch: app.fetch,
 };
-
-process.on("SIGINT", shutdown);
-process.on("SIGTERM", shutdown);
