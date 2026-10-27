@@ -1,23 +1,38 @@
-.PHONY: install dev test lint lint-fix check
+.PHONY: setup dev dev-node test lint fix typecheck check up down build
 
-install:
-	npm install
+setup:
+	bun install --frozen-lockfile
+
+up:
+	docker compose up -d --wait
+
+down:
+	docker compose down
 
 dev:
-	npm run dev
+	bun run dev
+
+dev-node:
+	bun run dev:node
+
+build:
+	bun run build
 
 test:
-	npm test
+	bun run test
 
 lint:
-	npm run lint
+	bun run lint
 
-lint-fix:
-	npm run lint:fix
+fix:
+	bun run lint:fix
+
+typecheck:
+	bun run typecheck
 
 check:
-	npm run typecheck
-	npm run lint
-	npm test
+	bun run typecheck
+	bun run lint
+	bun run test
 	npx --yes fallow@3.33.1 dupes --quiet --no-fragments
 	npx --yes --package @ast-grep/cli ast-grep scan
