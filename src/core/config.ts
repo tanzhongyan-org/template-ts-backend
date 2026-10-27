@@ -5,6 +5,9 @@ const envSchema = z.object({
   PORT: z.coerce.number().default(3000),
   APP_NAME: z.string().default("template-ts-backend"),
   APP_VERSION: z.string().default("0.1.0"),
+  DATABASE_URL: z
+    .string()
+    .default("postgresql://postgres:postgres@localhost:5432/template_ts_backend"),
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;

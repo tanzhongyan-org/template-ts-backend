@@ -1,6 +1,7 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { apiReference } from "@scalar/hono-api-reference";
 import { healthRouter } from "./api/routes/health.js";
+import { notesRouter } from "./api/routes/notes.js";
 import { config } from "./core/config.js";
 
 export function createApp() {
@@ -26,6 +27,7 @@ export function createApp() {
 
   // Feature routes
   app.route("/health", healthRouter);
+  app.route("/notes", notesRouter);
 
   // OpenAPI Specification
   app.doc("/doc", {
