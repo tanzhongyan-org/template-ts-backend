@@ -17,7 +17,7 @@ Do not repeat global workflow rules here.
 - Test Suites: Sister-file colocated tests (e.g. src/api/routes/<feature>.test.ts)
 
 ## 3. Data Access & Boundary Invariants
-- Direct access to process.env in domain logic is strictly banned. Import config from "@/core/config.js".
+- Direct access to process.env in domain logic is strictly banned. Import config from the core configuration module (e.g. "./core/config.js" or "../core/config.js").
 - Transport routes parse and validate request payloads via Zod before delegating to domain functions.
 - Domain functions return typed schemas, avoiding raw database leaks.
 
