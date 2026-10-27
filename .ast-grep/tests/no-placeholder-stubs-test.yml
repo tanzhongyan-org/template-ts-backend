@@ -1,0 +1,10 @@
+id: no-placeholder-stubs
+valid:
+  - "function realWork() { return 42; }"
+  - "const calculate = (a: number) => { return a * 2; };"
+  - "app.use('*', async (c, next) => { await next(); });"
+  - "items.map(() => 'item');"
+invalid:
+  - "function stub() {}"
+  - "const todo = () => {}"
+  - "const handler = function() {}"

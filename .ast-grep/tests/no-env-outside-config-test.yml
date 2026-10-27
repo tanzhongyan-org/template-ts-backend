@@ -1,0 +1,7 @@
+id: no-env-outside-config
+valid:
+  - "import { config } from '~/core/config';"
+  - "const port = config.port;"
+invalid:
+  - "const secret = process.env.SECRET_KEY;"
+  - "const port = process.env['PORT'];"
