@@ -1,8 +1,18 @@
-.PHONY: setup dev dev-node test lint fix typecheck check up down build audit
+BIN := node_modules/.bin
+BASE_URL ?= http://localhost:3000
+# Offline by default; CI passes ZIZMOR_ARGS= with GH_TOKEN set to enable the online audits.
+ZIZMOR_ARGS ?= --offline
+
+# renovate: datasource=pypi depName=zizmor
+ZIZMOR_VERSION := 1.31.1
+# renovate: datasource=pypi depName=schemathesis
+SCHEMATHESIS_VERSION := 4.32.6
+
+.PHONY: setup up down dev dev-node build db-push test lint fix fmt typecheck deadcode dupes slop policy verify check audit workflows dast template-debt
 
 setup:
 	bun install --frozen-lockfile
-	bunx lefthook@2.2.2 install
+	$(BIN)/lefthook install
 
 up:
 	docker compose up -d --wait
@@ -11,34 +21,64 @@ down:
 	docker compose down
 
 dev:
-	bun run dev
+	bun --watch src/index.ts
 
 dev-node:
-	bun run dev:node
+	$(BIN)/tsx watch src/node.ts
 
 build:
-	bun run build
+	$(BIN)/tsc -p tsconfig.build.json
+
+db-push:
+	$(BIN)/drizzle-kit push
 
 test:
-	bun run test
-
-lint:
-	bun run lint
-
-fix:
-	bun run lint:fix
+	$(BIN)/vitest run
 
 typecheck:
-	bun run typecheck
+	$(BIN)/tsc --noEmit
+
+lint:
+	$(BIN)/biome check .
+	$(BIN)/markdownlint-cli2
+
+fix:
+	$(BIN)/biome check --write .
+	$(BIN)/markdownlint-cli2 --fix
+
+# Formats one file; the agent post-edit hook calls this with FILE set.
+fmt:
+	$(BIN)/biome check --write --no-errors-on-unmatched --files-ignore-unknown=true $(FILE)
+
+deadcode:
+	$(BIN)/knip
+
+dupes:
+	$(BIN)/fallow dupes --quiet --no-fragments
+
+slop:
+	$(BIN)/ast-grep scan
+	$(BIN)/ast-grep test --skip-snapshot-tests
+
+policy:
+	node scripts/repo-policy.mjs all
+
+# Fast gates, no database. Used by git hooks and the agent stop hook.
+verify: typecheck lint slop policy
+
+# Full gate set. CI runs this.
+check: verify test deadcode dupes
 
 audit:
 	bun audit
 
-check:
-	bun run typecheck
-	bun run lint
-	bun run test
-	bunx knip@6.43.0
-	npx --yes fallow@3.33.1 dupes --quiet --no-fragments
-	npx --yes --package @ast-grep/cli@0.51.0 ast-grep scan
-	npx --yes --package @ast-grep/cli@0.51.0 ast-grep test --skip-snapshot-tests
+workflows:
+	uvx zizmor@$(ZIZMOR_VERSION) $(ZIZMOR_ARGS) --min-severity medium .github/workflows
+
+# Runs Schemathesis against a server already listening on BASE_URL.
+dast:
+	uvx schemathesis@$(SCHEMATHESIS_VERSION) run $(BASE_URL)/doc --url $(BASE_URL) \
+		--header "x-user-id: dast" --checks all --workers 1
+
+template-debt:
+	@git grep -n "TEMPLATE-TODO[(]" || true

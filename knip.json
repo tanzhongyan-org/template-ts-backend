@@ -1,9 +1,10 @@
 {
-  "$schema": "https://unpkg.com/knip@5/overview/configuration-schema.json",
-  "entry": ["src/index.ts", "src/node.ts"],
+  "$schema": "https://unpkg.com/knip@6/schema.json",
   "project": ["src/**/*.ts"],
+  "ignoreDependencies": ["@ast-grep/cli", "@biomejs/biome", "fallow", "markdownlint-cli2", "tsx"],
   "rules": {
     "exports": "off",
     "duplicates": "off"
-  }
+  },
+  "entry": ["src/node.ts"]
 }

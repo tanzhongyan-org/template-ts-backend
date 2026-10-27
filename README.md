@@ -1,51 +1,101 @@
-# TypeScript Backend API Template
+# template-ts-backend
 
-Universal TypeScript backend application template with contract-first OpenAPI routing, interactive API docs, agentic quality guardrails, and verification gates.
+A TypeScript backend starter for teams that want a typed REST API with an OpenAPI contract, a Postgres database and automated quality gates from the first commit.
 
-## Features
+[![CI](https://github.com/tanzhongyan-org/template-ts-backend/actions/workflows/ci.yml/badge.svg)](https://github.com/tanzhongyan-org/template-ts-backend/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/tanzhongyan-org/template-ts-backend/actions/workflows/codeql.yml/badge.svg)](https://github.com/tanzhongyan-org/template-ts-backend/actions/workflows/codeql.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-- **Runtime:** Bun 1.4.3 native runtime (with Node.js 22 fallback)
-- **Framework:** [Hono](https://hono.dev/) with [`@hono/zod-openapi`](https://github.com/honojs/middleware/tree/main/packages/zod-openapi) contract-first architecture
-- **Interactive Documentation:** [Scalar](https://scalar.com/) API reference at `/reference` and OpenAPI 3.0 specification at `/doc`
-- **Config & Validation:** Zod environment validation & typed route contracts via `createRoute`
-- **Code Quality:** [Biome](https://biomejs.dev/) (sub-100ms format & lint), Vitest, TypeScript strict mode
-- **Task Runner:** Universal `Makefile` (`setup`, `dev`, `test`, `lint`, `fix`, `typecheck`, `check`)
-- **Agent Guardrails:**
-  - `lefthook.yml`: Sub-second local Git pre-commit hooks
-  - `fallow.jsonc`: AST-aware code duplication and cognitive complexity limits
-  - `sgconfig.yml` + `.ast-grep/`: Automatic detection of placeholder stubs and unfulfilled code
-  - `.github/workflows/ci.yml`: Automated CI running the 6 Universal Verification Gates via `make check`
-  - `AGENTS.md`: Runtime-specific agent invariants
+## Quick start
 
-## Getting Started
+You need Bun, Docker and Node.js 22 or newer. [CONTRIBUTING.md](CONTRIBUTING.md) lists where each version is pinned.
 
-### 1. Create a New Repository
-Click **"Use this template"** on GitHub or use the GitHub CLI:
 ```bash
 gh repo create my-backend --template tanzhongyan-org/template-ts-backend --private --clone
 cd my-backend
-```
-*(On first push to `main`, GitHub Actions automatically renames all template placeholders to your new repository name and self-deletes the initialization workflow).*
-
-### 2. Local Setup
-```bash
-# Install dependencies
-make setup
-# or: bun install --frozen-lockfile
-
-# Start development server
+make setup && cp .env.example .env
+make up && make db-push
 make dev
-# or: bun run dev
 ```
 
-### 3. API Endpoints
-- `GET /`: Service welcome message
-- `GET /health`: Health check returning `{ status: "ok", timestamp: string, version: "0.1.0" }`
-- `GET /doc`: OpenAPI 3.0 JSON specification
-- `GET /reference`: Interactive Scalar documentation UI
+You should see `[Bun] Server listening on http://localhost:3000`. In another terminal:
 
-### 4. Run Verification Gates
 ```bash
-# Run all gates
-make check
+curl -s -H "x-user-id: alice" localhost:3000/notes
 ```
+
+You should see `[]`. Open `http://localhost:3000/reference` for the interactive API reference.
+
+## What you get
+
+- Hono routes defined with `createRoute`, so request and response schemas produce the OpenAPI document at `/doc`.
+- Zod 4 validation and a typed, validated config module.
+- Drizzle ORM on Postgres, with a notes example slice that scopes every query to its owner.
+- One error envelope for every failure: `{"error": {"message": "...", "status": 404}}`.
+- Fail-closed identity: requests without a trusted `x-user-id` header get a 401.
+- A request body size limit and server timeouts.
+- Six verification gates behind `make check`, plus git hooks, CI, CodeQL, secret scanning and scheduled API fuzzing.
+
+## After creating your repo
+
+1. Run the **Initialize Template Repository** workflow from the Actions tab. It renames the placeholders and opens a "Template follow-ups" issue.
+2. List what you still have to change:
+
+   ```bash
+   make template-debt
+   ```
+
+   You should see one line per `TEMPLATE-TODO(...)` marker, covering auth, owners, the security contact, the license holder and the example notes slice.
+
+## Configuration
+
+Copy `.env.example` to `.env`. Bun loads it on start.
+
+| Variable | Required | Default | Description |
+| --- | --- | --- | --- |
+| `NODE_ENV` | No | `development` | One of `development`, `test`, `production`. |
+| `PORT` | No | `3000` | HTTP port. |
+| `APP_NAME` | No | `template-ts-backend` | Title in the OpenAPI document. |
+| `APP_VERSION` | No | `0.1.0` | Version in the OpenAPI document and `/health`. |
+| `DATABASE_URL` | No | local Postgres URL | Postgres connection string. |
+| `TRUST_IDENTITY_HEADER` | No | `false` | When `true`, the `x-user-id` header identifies the caller. When `false`, `/notes` returns 401 for every request. |
+| `MAX_BODY_BYTES` | No | `1048576` | Largest accepted request body. Larger bodies get a 413. |
+
+> [!WARNING]
+> `TRUST_IDENTITY_HEADER=true` lets any client choose its identity. Use it for local work and tests only, and replace it with real authentication before you deploy.
+
+## Commands
+
+| Command | What it does |
+| --- | --- |
+| `make setup` | Installs dependencies and git hooks. |
+| `make up` / `make down` | Starts or stops Postgres with Docker Compose. |
+| `make db-push` | Applies the Drizzle schema to the database in `DATABASE_URL`. |
+| `make dev` | Runs the server on Bun with reload. |
+| `make dev-node` | Runs the server on Node.js with reload. |
+| `make build` | Compiles to `dist/` for the Node.js entry point. |
+| `make test` | Runs Vitest. Needs the database. |
+| `make lint` / `make fix` | Checks or fixes formatting and lint rules for code and Markdown. |
+| `make typecheck` | Runs the TypeScript compiler without emitting. |
+| `make deadcode` | Finds unused files and dependencies with knip. |
+| `make dupes` | Finds duplicated code with fallow. |
+| `make slop` | Runs the ast-grep anti-slop and boundary rules and their tests. |
+| `make policy` | Checks layout, docs, the dependency ledger and version drift. |
+| `make verify` | Runs the fast gates: typecheck, lint, slop, policy. No database. |
+| `make check` | Runs `make verify`, then tests, dead code and duplication. CI runs this. |
+| `make audit` | Checks dependencies for known vulnerabilities. |
+| `make workflows` | Lints GitHub workflows with zizmor. Needs `uv`. |
+| `make dast` | Fuzzes a running server with Schemathesis. Needs `uv`. |
+| `make template-debt` | Lists `TEMPLATE-TODO` markers. |
+
+## Project layout
+
+| Path | Purpose |
+| --- | --- |
+| `src/` | Application code. See [ARCHITECTURE.md](ARCHITECTURE.md). |
+| `drizzle/` | Generated SQL migrations. |
+| `docs/` | Decisions, specs and the dependency ledger. See [docs/README.md](docs/README.md). |
+| `scripts/` | Policy checker and agent hook. |
+| `.github/` | Workflows, issue forms and the branch ruleset. |
+
+More: [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), [LICENSE](LICENSE).

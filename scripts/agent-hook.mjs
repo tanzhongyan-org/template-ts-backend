@@ -1,86 +1,78 @@
-import { execSync } from "node:child_process";
+// Agent hook entry point shared by Claude Code and Gemini CLI.
+// Modes: `post-edit` formats the edited file, `stop` runs the fast gates.
+// It calls make targets only; each repo defines `fmt` and `verify` in its Makefile.
+import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 
-async function readStdin() {
+const SAFE_PATH = /^[\w@+./-]+$/;
+
+function readStdin() {
   return new Promise((resolve) => {
+    if (process.stdin.isTTY) {
+      resolve("");
+      return;
+    }
     let data = "";
     process.stdin.setEncoding("utf8");
     process.stdin.on("data", (chunk) => {
       data += chunk;
     });
-    process.stdin.on("end", () => {
-      resolve(data);
-    });
-    if (process.stdin.isTTY) {
-      resolve("");
-    }
+    process.stdin.on("end", () => resolve(data));
   });
+}
+
+function parsePayload(raw) {
+  try {
+    return raw.trim() ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
+function postEdit(payload) {
+  const filePath =
+    payload.tool_input?.file_path ||
+    payload.tool_input?.filePath ||
+    payload.tool_input?.path ||
+    process.argv[3];
+  if (filePath && SAFE_PATH.test(filePath) && fs.existsSync(filePath)) {
+    // Formatting problems must not block the agent.
+    spawnSync("make", ["--no-print-directory", "fmt", `FILE=${filePath}`], {
+      stdio: "inherit",
+      timeout: 8000,
+    });
+  }
+  process.exit(0);
+}
+
+function hasChanges() {
+  const status = spawnSync("git", ["status", "--porcelain"], { encoding: "utf8" });
+  return status.status === 0 && status.stdout.trim() !== "";
+}
+
+function stop(payload) {
+  if (payload.stop_hook_active === true || !hasChanges()) {
+    process.exit(0);
+  }
+
+  const run = spawnSync("make", ["--no-print-directory", "verify"], {
+    encoding: "utf8",
+    timeout: 110000,
+  });
+  if (run.status === 0) {
+    process.exit(0);
+  }
+
+  const output = `${run.stdout ?? ""}${run.stderr ?? ""}`.trimEnd().split("\n").slice(-40);
+  console.error(`make verify failed. Fix these errors before finishing:\n${output.join("\n")}`);
+  process.exit(2);
 }
 
 async function main() {
   const mode = process.argv[2] ?? "post-edit";
-  const rawInput = await readStdin();
-  let payload = {};
-  if (rawInput.trim()) {
-    try {
-      payload = JSON.parse(rawInput);
-    } catch {
-      // Non-JSON input
-    }
-  }
-
-  if (mode === "post-edit") {
-    // Run fast formatter/linter on changed file only
-    const filePath =
-      payload.tool_input?.file_path ||
-      payload.arguments?.filePath ||
-      payload.arguments?.path ||
-      process.argv[3];
-    if (filePath && fs.existsSync(filePath)) {
-      try {
-        execSync(`bunx biome check --write "${filePath}"`, {
-          stdio: "inherit",
-          timeout: 5000,
-        });
-      } catch {
-        // Do not block agent on formatting warnings
-      }
-    }
-    process.exit(0);
-  }
-
-  if (mode === "stop") {
-    // Anti-loop safeguard: check harness flag and local marker
-    const markerFile = ".git/agent-hook-stop-blocked";
-    if (payload.stop_hook_active === true || fs.existsSync(markerFile)) {
-      if (fs.existsSync(markerFile)) {
-        try {
-          fs.unlinkSync(markerFile);
-        } catch {}
-      }
-      process.exit(0);
-    }
-
-    try {
-      execSync("bun run check", { stdio: "inherit", timeout: 120000 });
-      if (fs.existsSync(markerFile)) {
-        try {
-          fs.unlinkSync(markerFile);
-        } catch {}
-      }
-      process.exit(0);
-    } catch (_err) {
-      // Create marker to prevent consecutive block loop
-      try {
-        fs.writeFileSync(markerFile, Date.now().toString());
-      } catch {}
-
-      const msg = "Verification check failed. Fix errors before finishing turn.";
-      console.error(msg);
-      process.stdout.write(`${JSON.stringify({ decision: "block", reason: msg })}\n`);
-      process.exit(2);
-    }
-  }
+  const payload = parsePayload(await readStdin());
+  if (mode === "post-edit") postEdit(payload);
+  if (mode === "stop") stop(payload);
 }
 
 main().catch(() => process.exit(0));

@@ -6,5 +6,7 @@ console.log(`[Scalar Docs] http://localhost:${config.PORT}/reference`);
 
 export default {
   port: config.PORT,
+  maxRequestBodySize: config.MAX_BODY_BYTES,
+  idleTimeout: 10,
   fetch: app.fetch,
 };

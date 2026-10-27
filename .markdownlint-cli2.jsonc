@@ -1,0 +1,11 @@
+{
+  "config": {
+    "default": true,
+    "MD013": false,
+    "MD060": { "style": "any" },
+    "MD033": { "allowed_elements": ["details", "summary"] }
+  },
+  "noBanner": true,
+  "globs": ["**/*.md"],
+  "ignores": [".github/pull_request_template.md", "node_modules/**", ".agents/**"]
+}

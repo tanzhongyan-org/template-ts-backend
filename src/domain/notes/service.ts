@@ -31,6 +31,7 @@ export const notesService = {
     const values: { title?: string; body?: string } = {};
     if (input.title !== undefined) values.title = input.title;
     if (input.body !== undefined) values.body = input.body;
+    if (Object.keys(values).length === 0) return this.get(id, ownerId);
 
     const [updated] = await db
       .update(notes)

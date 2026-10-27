@@ -6,6 +6,7 @@ const server = serve(
   {
     fetch: app.fetch,
     port: config.PORT,
+    serverOptions: { headersTimeout: 10_000, requestTimeout: 30_000 },
   },
   (info) => {
     console.log(`[Node.js] Server listening on http://localhost:${info.port}`);

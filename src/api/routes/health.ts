@@ -1,4 +1,4 @@
-import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { healthCheckResponseSchema } from "../../domain/health/schemas.js";
 import { getHealth } from "../../domain/health/service.js";
 
