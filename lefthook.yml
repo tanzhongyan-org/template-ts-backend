@@ -3,7 +3,7 @@ pre-commit:
   commands:
     format-lint:
       glob: "*.{ts,tsx,js,jsx,mjs,json,jsonc,md}"
-      run: make fmt FILE="{staged_files}"
+      run: FILE="{staged_files}" make --no-print-directory fmt
       stage_fixed: true
 
     secrets:
