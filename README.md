@@ -4,17 +4,17 @@ Universal TypeScript backend application template with contract-first OpenAPI ro
 
 ## Features
 
-- **Runtime:** Node.js 20+ with strict TypeScript ESM
+- **Runtime:** Bun 1.4.3 native runtime (with Node.js 22 fallback)
 - **Framework:** [Hono](https://hono.dev/) with [`@hono/zod-openapi`](https://github.com/honojs/middleware/tree/main/packages/zod-openapi) contract-first architecture
 - **Interactive Documentation:** [Scalar](https://scalar.com/) API reference at `/reference` and OpenAPI 3.0 specification at `/doc`
 - **Config & Validation:** Zod environment validation & typed route contracts via `createRoute`
 - **Code Quality:** [Biome](https://biomejs.dev/) (sub-100ms format & lint), Vitest, TypeScript strict mode
-- **Task Runner:** Universal `Makefile` (`install`, `dev`, `test`, `lint`, `lint-fix`, `check`)
+- **Task Runner:** Universal `Makefile` (`setup`, `dev`, `test`, `lint`, `fix`, `typecheck`, `check`)
 - **Agent Guardrails:**
   - `lefthook.yml`: Sub-second local Git pre-commit hooks
   - `fallow.jsonc`: AST-aware code duplication and cognitive complexity limits
   - `sgconfig.yml` + `.ast-grep/`: Automatic detection of placeholder stubs and unfulfilled code
-  - `.github/workflows/ci.yml`: Automated CI running the 6 Universal Verification Gates
+  - `.github/workflows/ci.yml`: Automated CI running the 6 Universal Verification Gates via `make check`
   - `AGENTS.md`: Runtime-specific agent invariants
 
 ## Getting Started
@@ -30,12 +30,12 @@ cd my-backend
 ### 2. Local Setup
 ```bash
 # Install dependencies
-make install
-# or: npm install
+make setup
+# or: bun install --frozen-lockfile
 
 # Start development server
 make dev
-# or: npm run dev
+# or: bun run dev
 ```
 
 ### 3. API Endpoints
@@ -46,22 +46,6 @@ make dev
 
 ### 4. Run Verification Gates
 ```bash
-# Run all core gates
+# Run all gates
 make check
-
-# Or individual verification gates:
-# Gate 1: Typecheck
-npm run typecheck
-
-# Gate 2: Lint & Format
-npm run lint
-
-# Gate 3: Test
-npm test
-
-# Gate 5: Duplication Audit
-npx --yes fallow@3.33.1 dupes --quiet --no-fragments
-
-# Gate 6: Anti-Slop Scan
-npx --yes --package @ast-grep/cli ast-grep scan
 ```
