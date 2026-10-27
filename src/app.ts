@@ -1,26 +1,43 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { apiReference } from "@scalar/hono-api-reference";
+import { bodyLimit } from "hono/body-limit";
+import { HTTPException } from "hono/http-exception";
+import { respondError } from "./api/errors.js";
+import { requireIdentity } from "./api/middleware/identity.js";
+import { requireJsonBody } from "./api/middleware/json-body.js";
 import { healthRouter } from "./api/routes/health.js";
 import { notesRouter } from "./api/routes/notes.js";
+import { allowedMethods } from "./api/routing.js";
 import { config } from "./core/config.js";
 
-export function createApp() {
+export type AppOptions = {
+  trustIdentityHeader?: boolean;
+  maxBodyBytes?: number;
+};
+
+export function createApp(options: AppOptions = {}) {
+  const trustHeader = options.trustIdentityHeader ?? config.TRUST_IDENTITY_HEADER;
+  const maxBodyBytes = options.maxBodyBytes ?? config.MAX_BODY_BYTES;
+
   const app = new OpenAPIHono({
     defaultHook: (result, c) => {
       if (!result.success) {
-        return c.json(
-          {
-            error: {
-              message: "Validation Error",
-              details: result.error.issues,
-            },
-          },
-          422,
-        );
+        return respondError(c, 422, "Validation Error", result.error.issues);
       }
       return undefined;
     },
   });
+
+  app.use(
+    "*",
+    bodyLimit({
+      maxSize: maxBodyBytes,
+      onError: (c) => respondError(c, 413, "Request body too large"),
+    }),
+  );
+  app.use("/notes/*", requireIdentity({ trustHeader }));
+  app.post("/notes", requireJsonBody);
+  app.patch("/notes/:id", requireJsonBody);
 
   // Root redirect to interactive API reference
   app.get("/", (c) => c.redirect("/reference", 302));
@@ -49,30 +66,21 @@ export function createApp() {
     }),
   );
 
-  // Global Not Found handler (JSON)
   app.notFound((c) => {
-    return c.json(
-      {
-        error: {
-          message: "Route not found",
-          status: 404,
-        },
-      },
-      404,
-    );
+    const allowed = allowedMethods(app.routes, c.req.path);
+    if (allowed.length > 0) {
+      c.header("Allow", allowed.join(", "));
+      return respondError(c, 405, "Method not allowed");
+    }
+    return respondError(c, 404, "Route not found");
   });
 
-  // Global Error handler (JSON)
   app.onError((err, c) => {
-    return c.json(
-      {
-        error: {
-          message: config.NODE_ENV === "production" ? "Internal Server Error" : err.message,
-          status: 500,
-        },
-      },
-      500,
-    );
+    if (err instanceof HTTPException) {
+      return respondError(c, err.status, err.message);
+    }
+    console.error(err);
+    return respondError(c, 500, "Internal Server Error");
   });
 
   return app;
