@@ -5,30 +5,29 @@ Do not repeat global workflow rules here.
 
 ## 1. Project Technology Stack
 - Runtime: Node.js 20+ with strict TypeScript ESM
-- Framework: Hono (@hono/node-server) with @hono/zod-openapi
-- Documentation: Interactive Scalar API documentation (@scalar/hono-api-reference) at /reference and OpenAPI v3 JSON spec at /doc
-- Validation: Zod schemas for input parsing and route contracts via createRoute
-- Lint & Format: Biome (sub-100ms)
-- Test Runner: Vitest
-- Task Runner: Universal Makefile
+- Framework: Hono with @hono/zod-openapi and @hono/node-server
+- Documentation: Interactive Scalar API at `/reference`, OpenAPI spec at `/doc`
+- Validation: Zod schemas via `createRoute` from `@hono/zod-openapi`
+- Code Quality: Biome (sub-100ms format & lint), Vitest, TypeScript strict mode
+- Task Runner: Universal Makefile (`install`, `dev`, `test`, `lint`, `lint-fix`, `check`)
 
 ## 2. Physical File Placement Rules
-- Transport Handlers: Place thin route controllers and OpenAPI route definitions in src/api/routes/<feature>.ts
-- Domain Boundaries: Place business logic and OpenAPI/Zod schemas in src/domain/<feature>/
-- Configuration: Validated environment variables in src/core/config.ts
-- Test Suites: Sister-file colocated tests (e.g. src/api/routes/<feature>.test.ts)
+- Transport Handlers: Thin route controllers in `src/api/routes/<feature>.ts`
+- Domain Boundaries: Business logic and schemas in `src/domain/<feature>/`
+- Configuration: Centralized environment schema in `src/core/config.ts`
+- App Architecture: Wire routes & middleware in `src/app.ts`; server lifecycle in `src/index.ts`
+- Test Suites: Sister-file colocated tests (`src/api/routes/<feature>.test.ts`)
 
-## 3. Data Access & Boundary Invariants
-- Direct access to process.env in domain logic is strictly banned. Import config from the core configuration module (e.g. "./core/config.js" or "../core/config.js").
-- Contract-First Routing: Define typed route definitions using createRoute from @hono/zod-openapi with request/response schemas.
-- Expose OpenAPI JSON spec at /doc and interactive documentation at /reference.
-- Domain functions return typed schemas, avoiding raw database leaks.
+## 3. Boundary & Routing Invariants
+- Direct access to `process.env` is strictly banned outside `src/core/config.ts`.
+- Contract-First Routing: Always define routes with `createRoute` specifying request/response schemas.
+- In tests, use in-memory `app.request()` rather than spinning up live network ports.
 
-## 4. The 6 Verification Gates
-Run these commands to prove task completion:
-1. Gate 1 (Typecheck): npm run typecheck
-2. Gate 2 (Lint & Format): npm run lint (or npx @biomejs/biome check .)
-3. Gate 3 (Tests): npm test
-4. Gate 4 (Dead Code): Zero unused exports
-5. Gate 5 (Duplication): npx --yes fallow@3.33.1 dupes --quiet --no-fragments
-6. Gate 6 (Anti-Slop): npx --yes --package @ast-grep/cli ast-grep scan
+## 4. Verification Gates
+Run `make check` or individual commands:
+1. Gate 1 (Typecheck): `npm run typecheck`
+2. Gate 2 (Lint & Format): `npm run lint`
+3. Gate 3 (Tests): `npm test`
+4. Gate 4 (Dead Code): `npm run build`
+5. Gate 5 (Duplication): `npx --yes fallow@3.33.1 dupes --quiet --no-fragments`
+6. Gate 6 (Anti-Slop): `npx --yes --package @ast-grep/cli ast-grep scan`

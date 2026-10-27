@@ -4,13 +4,13 @@ export const healthCheckResponseSchema = z
   .object({
     status: z.literal("ok").openapi({
       example: "ok",
-      description: "Service operational status",
+      description: "Service health status indicator",
     }),
     timestamp: z.string().datetime().openapi({
       example: "2026-10-27T12:00:00.000Z",
       description: "Current server ISO timestamp",
     }),
-    version: z.literal("0.1.0").openapi({
+    version: z.string().openapi({
       example: "0.1.0",
       description: "Application semantic version",
     }),
