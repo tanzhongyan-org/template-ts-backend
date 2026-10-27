@@ -1,10 +1,20 @@
-import { z } from "zod";
+import { z } from "@hono/zod-openapi";
 
-export const healthCheckResponseSchema = z.object({
-  status: z.literal("healthy"),
-  appName: z.string(),
-  environment: z.string(),
-  timestamp: z.string().datetime(),
-});
+export const healthCheckResponseSchema = z
+  .object({
+    status: z.literal("ok").openapi({
+      example: "ok",
+      description: "Service operational status",
+    }),
+    timestamp: z.string().datetime().openapi({
+      example: "2026-10-27T12:00:00.000Z",
+      description: "Current server ISO timestamp",
+    }),
+    version: z.literal("0.1.0").openapi({
+      example: "0.1.0",
+      description: "Application semantic version",
+    }),
+  })
+  .openapi("HealthCheckResponse");
 
 export type HealthCheckResponse = z.infer<typeof healthCheckResponseSchema>;

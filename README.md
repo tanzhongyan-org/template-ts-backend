@@ -1,13 +1,15 @@
 # TypeScript Backend API Template
 
-Universal TypeScript backend application template with agentic quality guardrails and verification gates.
+Universal TypeScript backend application template with contract-first OpenAPI routing, interactive API docs, agentic quality guardrails, and verification gates.
 
 ## Features
 
 - **Runtime:** Node.js 20+ with strict TypeScript ESM
-- **Framework:** [Hono](https://hono.dev/) with domain-colocated architecture
-- **Config & Validation:** Zod environment validation & route schemas
+- **Framework:** [Hono](https://hono.dev/) with [`@hono/zod-openapi`](https://github.com/honojs/middleware/tree/main/packages/zod-openapi) contract-first architecture
+- **Interactive Documentation:** [Scalar](https://scalar.com/) API reference at `/reference` and OpenAPI 3.0 specification at `/doc`
+- **Config & Validation:** Zod environment validation & typed route contracts via `createRoute`
 - **Code Quality:** [Biome](https://biomejs.dev/) (sub-100ms format & lint), Vitest, TypeScript strict mode
+- **Task Runner:** Universal `Makefile` (`install`, `dev`, `test`, `lint`, `lint-fix`, `check`)
 - **Agent Guardrails:**
   - `lefthook.yml`: Sub-second local Git pre-commit hooks
   - `fallow.jsonc`: AST-aware code duplication and cognitive complexity limits
@@ -28,14 +30,26 @@ cd my-backend
 ### 2. Local Setup
 ```bash
 # Install dependencies
-npm install
+make install
+# or: npm install
 
 # Start development server
-npm run dev
+make dev
+# or: npm run dev
 ```
 
-### 3. Run Verification Gates
+### 3. API Endpoints
+- `GET /`: Service welcome message
+- `GET /health`: Health check returning `{ status: "ok", timestamp: string, version: "0.1.0" }`
+- `GET /doc`: OpenAPI 3.0 JSON specification
+- `GET /reference`: Interactive Scalar documentation UI
+
+### 4. Run Verification Gates
 ```bash
+# Run all core gates
+make check
+
+# Or individual verification gates:
 # Gate 1: Typecheck
 npm run typecheck
 
