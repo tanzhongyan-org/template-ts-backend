@@ -1,33 +1,31 @@
-# TypeScript Backend Agent Guidelines (L0)
+# TypeScript Backend Agent Guidelines (L1 Extension)
 
-## 1. Universal Architectural Invariants
-- **Domain Colocation over Technical Grab-Bags:** Organize code strictly by cohesive domain boundaries (`src/domain/<feature>/`). Never create generic `utils/`, `helpers/`, or `misc/` directories.
-- **Unidirectional Layering:**
-  `Transport (HTTP routes in src/api) -> Domain Services -> Persistence (Repositories) / Infrastructure`
-  Transport handlers parse/validate inputs and delegate immediately; they never execute business rules or raw database queries.
-- **Boundary Schema Validation:** Direct access to `process.env` in domain logic is strictly banned. Validate all environment variables inside `src/core/config.ts` using strict Zod schemas.
-- **Search-Before-Author:** Search existing modules before authoring helpers. Parameterize existing code; fork-and-duplicate is strictly prohibited.
+Inherits: Universal L0 Invariants (workflow/AGENTS.md).
+Do not repeat global workflow rules here.
 
-## 2. Directory Layout
-```
-src/
-├── api/                         # Transport: HTTP route handlers & middleware (thin)
-│   └── routes/
-├── domain/                      # Cohesive Domain Boundaries (Colocated)
-│   └── <feature>/
-│       ├── schemas.ts           # Zod request/response validation schemas
-│       ├── service.ts           # Pure business logic & transactions
-│       └── repository.ts        # Data persistence layer
-├── core/                        # Infrastructure & Cross-cutting primitives
-│   └── config.ts                # Validated Zod environment configuration
-└── index.ts                     # Application entry point & server bootstrap
-```
+## 1. Project Technology Stack
+- Runtime: Node.js 20+ with strict TypeScript ESM
+- Framework: Hono (@hono/node-server)
+- Validation: Zod schemas for input parsing and route contracts
+- Lint & Format: Biome (sub-100ms)
+- Test Runner: Vitest
 
-## 3. The 6 Verification Gates
-Before claiming task completion or creating PRs, all gates must pass:
-1. **Typecheck:** `npm run typecheck` (0 errors)
-2. **Lint & Format:** `npx @biomejs/biome check .` (0 warnings)
-3. **Tests:** `npm test` (Full suite green)
-4. **Dead Code:** Zero unused exports
-5. **Duplication Audit:** `npx --yes fallow@3.33.1 dupes --quiet --no-fragments`
-6. **Anti-Slop Scan:** `npx --yes --package @ast-grep/cli ast-grep scan`
+## 2. Physical File Placement Rules
+- Transport Handlers: Place thin route controllers in src/api/routes/<feature>.ts
+- Domain Boundaries: Place business logic and schemas in src/domain/<feature>/
+- Configuration: Validated environment variables in src/core/config.ts
+- Test Suites: Sister-file colocated tests (e.g. src/api/routes/<feature>.test.ts)
+
+## 3. Data Access & Boundary Invariants
+- Direct access to process.env in domain logic is strictly banned. Import config from "@/core/config.js".
+- Transport routes parse and validate request payloads via Zod before delegating to domain functions.
+- Domain functions return typed schemas, avoiding raw database leaks.
+
+## 4. The 6 Verification Gates
+Run these commands to prove task completion:
+1. Gate 1 (Typecheck): npm run typecheck
+2. Gate 2 (Lint & Format): npm run lint (or npx @biomejs/biome check .)
+3. Gate 3 (Tests): npm test
+4. Gate 4 (Dead Code): Zero unused exports
+5. Gate 5 (Duplication): npx --yes fallow@3.33.1 dupes --quiet --no-fragments
+6. Gate 6 (Anti-Slop): npx --yes --package @ast-grep/cli ast-grep scan
