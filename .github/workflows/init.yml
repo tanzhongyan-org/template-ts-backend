@@ -19,13 +19,14 @@ jobs:
           echo "Renaming template-ts-backend to $NEW_NAME..."
           find . -type f \( -name "*.json" -o -name "*.ts" -o -name "*.md" -o -name "*.jsonc" -o -name "*.yml" \) \
             -not -path "*/.git/*" \
+            -not -path "*/.github/*" \
             -not -path "*/node_modules/*" \
             -exec sed -i "s/template-ts-backend/$NEW_NAME/g" {} +
 
-      - name: Remove init workflow and commit changes
+      - name: Commit and push changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git rm .github/workflows/init.yml
-          git commit -m "chore: initialize repository from template-ts-backend"
+          git add -A
+          git diff --staged --quiet || git commit -m "chore: initialize repository from template-ts-backend"
           git push
