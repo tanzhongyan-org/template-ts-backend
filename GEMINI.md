@@ -1,4 +1,5 @@
 # Gemini CLI Project Guidelines
 
-Follow all project rules, verification gates, and conventions documented in:
-AGENTS.md
+Follow the project rules, verification gates and conventions in:
+
+@AGENTS.md

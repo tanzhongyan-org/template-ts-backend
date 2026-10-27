@@ -2,27 +2,38 @@ pre-commit:
   parallel: false
   commands:
     format-lint:
-      glob: "*.{ts,tsx,js,jsx,json,md}"
-      run: npx @biomejs/biome check --write --no-errors-on-unmatched {staged_files}
+      glob: "*.{ts,tsx,js,jsx,mjs,json,jsonc,md}"
+      run: make fmt FILE="{staged_files}"
       stage_fixed: true
 
-    ast-grep-stubs:
-      run: npx --yes --package @ast-grep/cli@0.51.0 ast-grep scan
+    secrets:
+      run: |
+        if command -v gitleaks >/dev/null 2>&1; then
+          gitleaks git --staged --redact --no-banner
+        else
+          echo "gitleaks is not installed; skipping staged secret scan (https://github.com/gitleaks/gitleaks#installing)"
+        fi
+
+    anti-slop:
+      run: make slop
+
+    policy:
+      run: make policy
 
     ai-slop-regex:
       run: "! git diff --staged -U0 -- ':(exclude)*.md' | rg -i '\\b(as an ai language model|here is the (rest of the )?code|i hope this helps)\\b'"
 
 commit-msg:
   commands:
+    conventional-commit:
+      run: "head -n1 {1} | grep -Eq '^(Merge |Revert |(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\\([a-z0-9._/-]+\\))?!?: .+)'"
     forbid-ai-trailers:
       run: "! rg -i 'co-authored-by:.*(claude|copilot|assistant|gpt)' {1}"
 
 pre-push:
   parallel: false
   commands:
-    typecheck:
-      run: bun run typecheck
-    fallow-dupes:
-      run: npx --yes fallow@3.33.1 dupes --quiet --no-fragments
+    verify:
+      run: make verify
     unit-tests:
-      run: bun run test
+      run: make test

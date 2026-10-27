@@ -1,4 +1,5 @@
 # Claude Code Project Guidelines
 
-Follow all project rules, verification gates, and conventions documented in:
+Follow the project rules, verification gates and conventions in:
+
 @AGENTS.md

@@ -28,3 +28,6 @@ Thumbs.db
 .vscode/*
 !.vscode/settings.json
 !.vscode/extensions.json
+
+# Schemathesis cache
+.schemathesis/
