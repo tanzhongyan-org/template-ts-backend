@@ -1,0 +1,52 @@
+{
+  "layout": {
+    "allow": [
+      ".agents",
+      ".ast-grep",
+      ".ast-grep/rules",
+      ".ast-grep/tests",
+      ".claude",
+      ".gemini",
+      ".github",
+      ".github/ISSUE_TEMPLATE",
+      ".github/rulesets",
+      ".github/workflows",
+      "docs",
+      "docs/archive",
+      "docs/decisions",
+      "docs/plans",
+      "docs/specs",
+      "drizzle",
+      "drizzle/meta",
+      "scripts",
+      "src",
+      "src/api",
+      "src/api/middleware",
+      "src/api/routes",
+      "src/core",
+      "src/domain",
+      "src/domain/*"
+    ]
+  },
+  "docs": {
+    "exclude": ["docs/plans/**", "docs/specs/**", "docs/archive/**", ".agents/**"],
+    "externalPrefixes": ["workflow/", "shared/"],
+    "ignorePaths": ["dist", "dist/**"],
+    "envExample": ".env.example",
+    "envDocumentedIn": "README.md"
+  },
+  "dependencies": {
+    "ledger": "docs/dependencies.md",
+    "manifests": ["package.json"]
+  },
+  "versions": [
+    {
+      "name": "postgres",
+      "sources": [
+        { "file": "compose.yaml", "pattern": "image:\\s*postgres:(\\S+)" },
+        { "file": ".github/workflows/ci.yml", "pattern": "image:\\s*postgres:(\\S+)" },
+        { "file": ".github/workflows/dast.yml", "pattern": "image:\\s*postgres:(\\S+)" }
+      ]
+    }
+  ]
+}
