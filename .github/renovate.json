@@ -4,13 +4,24 @@
   "minimumReleaseAge": "3 days",
   "lockFileMaintenance": {
     "enabled": true,
-    "schedule": ["before 5am on monday"]
+    "schedule": ["before 5am on monday"],
+    "automerge": true,
+    "automergeType": "pr",
+    "platformAutomerge": true
   },
   "packageRules": [
     {
-      "description": "Group minor, patch and digest updates into one pull request",
+      "description": "Group minor, patch and digest updates into one pull request and automerge on green CI",
       "matchUpdateTypes": ["minor", "patch", "digest"],
-      "groupName": "non-major dependencies"
+      "groupName": "non-major dependencies",
+      "automerge": true,
+      "automergeType": "pr",
+      "platformAutomerge": true
+    },
+    {
+      "description": "Hold the Node 22 LTS line across engines, actions, and types",
+      "matchPackageNames": ["node", "@types/node"],
+      "allowedVersions": "<23"
     }
   ],
   "customManagers": [
@@ -22,5 +33,6 @@
         "#\\s*renovate:\\s*datasource=(?<datasource>\\S+)\\s+depName=(?<depName>\\S+)(?:\\s+versioning=(?<versioning>\\S+))?(?:\\s+extractVersion=(?<extractVersion>\\S+))?\\s*\\n[^\\n]*?(?::=|=|:)\\s*[\"']?(?<currentValue>[^\\s\"']+)[\"']?"
       ]
     }
-  ]
+  ],
+  "postUpdateOptions": ["gomodTidy"]
 }
