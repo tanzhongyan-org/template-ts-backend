@@ -3,7 +3,8 @@ pre-commit:
   commands:
     format-lint:
       glob: "*.{ts,tsx,js,jsx,mjs,json,jsonc,md}"
-      run: FILE="{staged_files}" make --no-print-directory fmt
+      # lefthook quotes each staged file itself, so pass them straight to biome.
+      run: node_modules/.bin/biome check --write --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}
       stage_fixed: true
 
     secrets:
@@ -11,7 +12,7 @@ pre-commit:
         if command -v gitleaks >/dev/null 2>&1; then
           gitleaks git --staged --redact --no-banner
         else
-          echo "gitleaks is not installed; skipping staged secret scan (https://github.com/gitleaks/gitleaks#installing)"
+          echo 'warning: gitleaks is not installed; skipping staged secret scan (https://github.com/gitleaks/gitleaks#installing)' >&2
         fi
 
     anti-slop:

@@ -8,7 +8,15 @@ A TypeScript backend starter for teams that want a typed REST API with an OpenAP
 
 ## Quick start
 
-You need Bun, Docker and Node.js 22 or newer. [CONTRIBUTING.md](.github/CONTRIBUTING.md) lists where each version is pinned.
+You need:
+
+- Bun and Node.js 22 or newer.
+- Docker, for the local Postgres.
+- GNU make. On Windows run `winget install ezwinports.make`; on macOS run `xcode-select --install`. Restart your terminal and agent afterwards.
+
+If port 5432 is taken, set `POSTGRES_PORT` in `.env` and update the port in `DATABASE_URL`. To skip the agent stop hook for one session, set `AGENT_HOOK_SKIP=1`.
+
+[CONTRIBUTING.md](.github/CONTRIBUTING.md) lists where each version is pinned.
 
 ```bash
 gh repo create my-backend --template tanzhongyan-org/template-ts-backend --private --clone
@@ -58,6 +66,7 @@ Copy `.env.example` to `.env`. Bun loads it on start.
 | `APP_NAME` | No | `template-ts-backend` | Title in the OpenAPI document. |
 | `APP_VERSION` | No | `0.1.0` | Version in the OpenAPI document and `/health`. |
 | `DATABASE_URL` | No | local Postgres URL | Postgres connection string. |
+| `POSTGRES_PORT` | No | `5432` | Host port Docker Compose publishes Postgres on. Change it when 5432 is taken. |
 | `TRUST_IDENTITY_HEADER` | No | `false` | When `true`, the `x-user-id` header identifies the caller. When `false`, `/notes` returns 401 for every request. |
 | `MAX_BODY_BYTES` | No | `1048576` | Largest accepted request body. Larger bodies get a 413. |
 
