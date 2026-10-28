@@ -37,12 +37,23 @@ function postEdit(payload) {
     process.argv[3];
   if (filePath && SAFE_PATH.test(filePath) && fs.existsSync(filePath)) {
     // Formatting problems must not block the agent.
-    spawnSync("make", ["--no-print-directory", "fmt", `FILE=${filePath}`], {
-      stdio: "inherit",
+    const run = spawnSync("make", ["--no-print-directory", "fmt", `FILE=${filePath}`], {
+      stdio: ["ignore", "ignore", "inherit"],
       timeout: 8000,
     });
+    makeMissing(run);
   }
   process.exit(0);
+}
+
+// A missing or broken tool must explain itself and never trap the agent.
+function makeMissing(run) {
+  if (run.error?.code !== "ENOENT") return false;
+  console.error(
+    "agent-hook: make is not on PATH, so checks were skipped. Install GNU make " +
+      "(Windows: winget install ezwinports.make; macOS: xcode-select --install) and restart the agent.",
+  );
+  return true;
 }
 
 function hasChanges() {
@@ -51,7 +62,7 @@ function hasChanges() {
 }
 
 function stop(payload) {
-  if (payload.stop_hook_active === true || !hasChanges()) {
+  if (payload.stop_hook_active === true || process.env.AGENT_HOOK_SKIP === "1" || !hasChanges()) {
     process.exit(0);
   }
 
@@ -59,7 +70,11 @@ function stop(payload) {
     encoding: "utf8",
     timeout: 110000,
   });
-  if (run.status === 0) {
+  if (run.status === 0 || makeMissing(run)) {
+    process.exit(0);
+  }
+  if (run.error) {
+    console.error(`agent-hook: make verify did not finish (${run.error.message}); skipped.`);
     process.exit(0);
   }
 

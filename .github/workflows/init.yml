@@ -2,6 +2,8 @@ name: Initialize Template Repository
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
 
 permissions: {}
 
@@ -13,31 +15,55 @@ jobs:
     timeout-minutes: 10
     permissions:
       contents: write
+    outputs:
+      initialized: ${{ steps.marker.outputs.initialized }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          # The push step below authenticates with an explicit header, so the token is not persisted in .git/config.
           persist-credentials: false
 
+      - name: Check the template has not been initialized yet
+        id: marker
+        run: |
+          if grep -q "template-ts-backend" package.json; then
+            echo "initialized=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Template placeholders are already replaced; nothing to do."
+            echo "initialized=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Rename template placeholders
+        if: steps.marker.outputs.initialized == 'true'
         run: |
           NEW_NAME="${GITHUB_REPOSITORY#*/}"
+          NEW_SNAKE="$(printf '%s' "$NEW_NAME" | tr '-' '_' | tr -c 'A-Za-z0-9_\n' '_')"
           echo "Renaming template-ts-backend to $NEW_NAME..."
-          find . -type f \( -name "*.json" -o -name "*.ts" -o -name "*.md" -o -name "*.jsonc" -o -name "*.yml" \)             -not -path "*/.git/*"             -not -path "./.github/workflows/*"             -not -path "*/node_modules/*"             -exec sed -i "s/template-ts-backend/$NEW_NAME/g" {} +
+          find . -type f \( -name "*.json" -o -name "*.jsonc" -o -name "*.ts" -o -name "*.md" -o -name "*.yml" -o -name "*.yaml" -o -name ".env.example" \) \
+            -not -path "./.git/*" \
+            -not -path "./.github/workflows/*" \
+            -not -path "*/node_modules/*" \
+            -exec sed -i \
+              -e "s#tanzhongyan-org/template-ts-backend#${GITHUB_REPOSITORY}#g" \
+              -e "s#template-ts-backend#${NEW_NAME}#g" \
+              -e "s#template_ts_backend#${NEW_SNAKE}#g" {} +
 
       - name: Commit and push changes
+        if: steps.marker.outputs.initialized == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -A
-          git diff --staged --quiet || git commit -m "chore: initialize repository from template-ts-backend"
+          git diff --staged --quiet || git commit -m "chore: initialize repository from template"
           AUTH="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
-          git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $AUTH" push
+          git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $AUTH" push origin HEAD:main
 
   follow-ups:
     name: Open follow-up issue
     needs: init-repo
+    if: needs.init-repo.outputs.initialized == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:

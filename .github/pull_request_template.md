@@ -19,4 +19,4 @@
 - [ ] Tests cover the change at the public entry point.
 - [ ] Docs are updated in this PR (`ARCHITECTURE.md`, README tables).
 - [ ] Any new dependency has a row in `docs/dependencies.md`.
-- [ ] Any new directory has an ADR and a `layout.allow` entry in `scripts/repo-policy.json`.
+- [ ] Any new top-level directory is in `layout.allow` in `scripts/repo-policy.json`.
