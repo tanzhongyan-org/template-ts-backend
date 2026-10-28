@@ -26,6 +26,15 @@
       "src/core",
       "src/domain",
       "src/domain/*"
+    ],
+    "forbid": [
+      "CLAUDE.md",
+      "**/CLAUDE.md",
+      "CLAUDE.local.md",
+      "GEMINI.md",
+      "**/GEMINI.md",
+      ".cursorrules",
+      ".github/copilot-instructions.md"
     ]
   },
   "docs": {
@@ -43,9 +52,18 @@
     {
       "name": "postgres",
       "sources": [
-        { "file": "compose.yaml", "pattern": "image:\\s*postgres:(\\S+)" },
-        { "file": ".github/workflows/ci.yml", "pattern": "image:\\s*postgres:(\\S+)" },
-        { "file": ".github/workflows/dast.yml", "pattern": "image:\\s*postgres:(\\S+)" }
+        {
+          "file": "compose.yaml",
+          "pattern": "image:\\s*postgres:(\\S+)"
+        },
+        {
+          "file": ".github/workflows/ci.yml",
+          "pattern": "image:\\s*postgres:(\\S+)"
+        },
+        {
+          "file": ".github/workflows/dast.yml",
+          "pattern": "image:\\s*postgres:(\\S+)"
+        }
       ]
     }
   ]

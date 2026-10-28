@@ -8,7 +8,7 @@ A TypeScript backend starter for teams that want a typed REST API with an OpenAP
 
 ## Quick start
 
-You need Bun, Docker and Node.js 22 or newer. [CONTRIBUTING.md](CONTRIBUTING.md) lists where each version is pinned.
+You need Bun, Docker and Node.js 22 or newer. [CONTRIBUTING.md](.github/CONTRIBUTING.md) lists where each version is pinned.
 
 ```bash
 gh repo create my-backend --template tanzhongyan-org/template-ts-backend --private --clone
@@ -98,4 +98,4 @@ Copy `.env.example` to `.env`. Bun loads it on start.
 | `scripts/` | Policy checker and agent hook. |
 | `.github/` | Workflows, issue forms and the branch ruleset. |
 
-More: [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), [LICENSE](LICENSE).
+More: [CONTRIBUTING.md](.github/CONTRIBUTING.md), [SECURITY.md](.github/SECURITY.md), [LICENSE](LICENSE).

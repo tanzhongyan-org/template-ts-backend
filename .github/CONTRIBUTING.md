@@ -50,7 +50,7 @@ The notes slice is the pattern. Touch these files in order:
 6. `src/api/routes/notes.test.ts`: test through `app.request()` at the public route, including the 401 and cross-owner 404 cases.
 7. `ARCHITECTURE.md` and `docs/dependencies.md`: update the code map and add a ledger row for any new dependency.
 
-A new directory under `src/` needs an ADR in `docs/decisions/` and an entry in `repo-policy.json` `layout.allow`, in the same pull request.
+A new directory under `src/` needs an ADR in `docs/decisions/` and an entry in `scripts/repo-policy.json` `layout.allow`, in the same pull request.
 
 ## Write commits and pull requests
 
@@ -82,7 +82,7 @@ Replace `<owner>/<repo>`. You should see a JSON response with an `id`.
 <details>
 <summary>Renovate and template follow-ups</summary>
 
-`renovate.json` groups non-major updates, waits 3 days after a release, and reads `# renovate:` comments in the Makefile and workflows. Install the Renovate GitHub app to turn it on.
+`.github/renovate.json` groups non-major updates, waits 3 days after a release, and reads `# renovate:` comments in the Makefile and workflows. Install the Renovate GitHub app to turn it on.
 
 `make template-debt` lists every `TEMPLATE-TODO` marker. The licence holder in `LICENSE` is one of them.
 
