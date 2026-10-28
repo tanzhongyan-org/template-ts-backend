@@ -2,6 +2,7 @@
 
 Inherits: Universal L0 Invariants (workflow/AGENTS.md).
 Do not repeat global workflow rules here. The layout and code map live in [ARCHITECTURE.md](ARCHITECTURE.md).
+This is the only agent instruction file. Claude Code, Codex, Cursor, Copilot and Gemini read it. Do not add CLAUDE.md, GEMINI.md or other per-tool copies: Claude Code ignores this file once a CLAUDE.md exists. `make policy` rejects them.
 
 ## 1. Stack
 
@@ -15,7 +16,7 @@ Do not repeat global workflow rules here. The layout and code map live in [ARCHI
 
 - The Code map in [ARCHITECTURE.md](ARCHITECTURE.md) lists every directory and the helper to reuse.
 - Handlers in `src/api/routes/<feature>.ts`; business logic and schemas in `src/domain/<feature>/`.
-- New top-level or `src/` directories need an ADR and a `repo-policy.json` `layout.allow` change in the same PR.
+- New top-level or `src/` directories need an ADR and a `scripts/repo-policy.json` `layout.allow` change in the same PR.
 - Tests sit beside the code they cover (`src/api/routes/notes.test.ts`).
 
 ## 3. Invariants

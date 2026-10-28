@@ -34,7 +34,7 @@ Reuse these before you write something similar.
 | `src/core/config.ts` | The only reader of `process.env`. | Add a variable to the schema and to `.env.example`. |
 | `src/core/database.ts` | Postgres client and Drizzle instance. | Import `db`. |
 | `drizzle/` | Generated migrations. | — |
-| `scripts/repo-policy.mjs` | Layout, docs, ledger and drift checks. | Configure it in `repo-policy.json`. |
+| `scripts/repo-policy.mjs` | Layout, docs, ledger and drift checks. | Configure it in `scripts/repo-policy.json`. |
 | `scripts/agent-hook.mjs` | Format and verify hooks for coding agents. | — |
 | `.ast-grep/rules/` | Anti-slop and boundary rules. | Add a rule and a test in `.ast-grep/tests/`. |
 
@@ -42,7 +42,7 @@ Reuse these before you write something similar.
 
 - Only `src/core/config.ts` reads `process.env`. [enforced by ast-grep]
 - No empty function or arrow-function stubs. [enforced by ast-grep]
-- Every directory is listed in `repo-policy.json`. [enforced by `make policy`]
+- Every directory is listed in `scripts/repo-policy.json`. [enforced by `make policy`]
 - Every dependency has a row in `docs/dependencies.md`. [enforced by `make policy`]
 - The Postgres image tag is the same in `compose.yaml` and the workflows. [enforced by `make policy`]
 - Every `/notes` query filters by the caller's `ownerId`. [enforced by tests]
