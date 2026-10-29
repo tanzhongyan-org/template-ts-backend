@@ -30,7 +30,7 @@
     "markdownlint-cli2": "0.24.0",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
-    "typescript5": "npm:typescript@5.9.3",
+    "typescript5": "npm:typescript@7.0.2",
     "vitest": "^5.0.5"
   },
   "packageManager": "bun@1.4.4",
