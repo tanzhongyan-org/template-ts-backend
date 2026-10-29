@@ -19,3 +19,5 @@ jobs:
       database-url: postgresql://postgres:password@localhost:5432/template_ts_backend
       install-command: bun install --frozen-lockfile
       db-setup-command: make db-push
+      run-licenses: true
+      run-security: true

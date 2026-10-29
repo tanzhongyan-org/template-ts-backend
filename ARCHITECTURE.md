@@ -68,3 +68,18 @@ Reuse these before you write something similar.
 | Logging | Handlers log with `console`; unexpected errors are logged once in the 500 handler. |
 | Database | `src/core/database.ts` opens one connection pool. Services use the Drizzle query builder, so values are always parameterized. |
 | Migrations | Drizzle Kit generates SQL into `drizzle/`. `make db-push` applies the schema directly for local work and CI. |
+
+## Services
+
+Baseline §1 rows, decided for this backend-only template. A fresh clone runs with
+nothing but `.env.example` filled in: `make up` starts the one Postgres container,
+`make db-push` applies the schema, `make dev` starts the server.
+
+| Service | Status | How |
+| --- | --- | --- |
+| Database | In | Plain Postgres through `DATABASE_URL`, Drizzle queries, one Compose container for dev. |
+| Auth | In | Dev header stub plus JWT validation against the product's JWKS (`JWKS_URL`). The product's login host lives elsewhere. |
+| Hosting | Out | A derived service chooses its host. The template runs on Bun or Node.js with no host API. |
+| Email, SMS | Out | No notification glue in the template; the product composes providers behind its own API. |
+| Payments, AI, files | Out | Same: product features, not template features. No provider SDK is pinned here. |
+| Analytics, errors, uptime | Out | The product wires PostHog, Sentry and uptime checks; the template exposes `/health` for them. |

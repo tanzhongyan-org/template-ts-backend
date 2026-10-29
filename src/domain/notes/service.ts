@@ -1,3 +1,5 @@
+// Example slice: replace with real features.
+// TEMPLATE-TODO(notes): replace the example notes slice with your own features
 import { and, desc, eq } from "drizzle-orm";
 import { db } from "../../core/database.js";
 import { notes } from "./schema.js";
