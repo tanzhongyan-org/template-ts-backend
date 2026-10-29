@@ -32,22 +32,47 @@ async function fetchBytes(url) {
 
 // --- New-dependency check -------------------------------------------------
 
-function baseRef() {
-  for (const args of [
-    ["merge-base", "HEAD", "origin/main"],
-    ["rev-parse", "HEAD~1"],
-  ]) {
-    try {
-      return execFileSync("git", args, {
-        cwd: root,
-        encoding: "utf8",
-        stdio: ["ignore", "pipe", "ignore"],
-      }).trim();
-    } catch {
-      // missing ref: try the next fallback
-    }
+// The dependency set new packages are diffed against: the branch point with
+// main when history allows, else main's tip (fetching it over a public read
+// in shallow checkouts), else the parent commit. Null when none exists.
+function baseDependencies() {
+  const run = (args) =>
+    execFileSync("git", args, {
+      cwd: root,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+  const show = (ref) => {
+    const oldPkg = JSON.parse(run(["show", `${ref}:package.json`]));
+    return new Set(
+      Object.keys({
+        ...oldPkg.dependencies,
+        ...oldPkg.devDependencies,
+        ...oldPkg.optionalDependencies,
+      }),
+    );
+  };
+  try {
+    return show(run(["merge-base", "HEAD", "origin/main"]));
+  } catch {
+    // no shared history with main: try the fallbacks below
   }
-  return null;
+  try {
+    return show("origin/main");
+  } catch {
+    // shallow checkout without the base ref: fetch it
+  }
+  try {
+    run(["fetch", "origin", "main:refs/remotes/origin/main", "--depth=1", "--quiet"]);
+    return show("origin/main");
+  } catch {
+    // no origin remote: try the parent commit
+  }
+  try {
+    return show("HEAD~1");
+  } catch {
+    return null;
+  }
 }
 
 function ledgerRows() {
@@ -72,23 +97,10 @@ async function checkNewDependencies() {
   const pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
   const specs = { ...pkg.dependencies, ...pkg.devDependencies, ...pkg.optionalDependencies };
   const current = new Set(Object.keys(specs));
-  const base = baseRef();
-  let old = new Set();
-  if (base) {
-    try {
-      const oldPkg = JSON.parse(
-        execFileSync("git", ["show", `${base}:package.json`], { cwd: root, encoding: "utf8" }),
-      );
-      old = new Set(
-        Object.keys({
-          ...oldPkg.dependencies,
-          ...oldPkg.devDependencies,
-          ...oldPkg.optionalDependencies,
-        }),
-      );
-    } catch {
-      old = new Set();
-    }
+  const old = baseDependencies();
+  if (!old) {
+    console.log("security: new-dependency check: no git history available; skipping");
+    return;
   }
   const added = [...current].filter((name) => !old.has(name)).sort();
   if (added.length === 0) {
@@ -186,7 +198,10 @@ async function ensureTool(tool, version) {
   if (hit) return hit;
   const dir = join(toolsDir, `${tool}-${version}`);
   const dest = join(dir, spec.binary);
-  if (existsSync(dest)) return dest;
+  // Probe the cache by executing it instead of checking for it first, so a
+  // missing or broken cached binary falls through to a fresh download.
+  const cached = fromPath(dest, spec.versionArgs, version);
+  if (cached) return cached;
   console.log(`security: downloading ${tool} ${version}`);
   const base = `https://github.com/${spec.repo}/releases/download/v${version}`;
   const archive = await fetchBytes(`${base}/${spec.asset}`);
