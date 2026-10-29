@@ -59,11 +59,19 @@ function ledgerRows() {
   return rows;
 }
 
+function registryName(spec, declared) {
+  if (typeof spec === "string" && spec.startsWith("npm:")) {
+    const rest = spec.slice("npm:".length);
+    const at = rest.lastIndexOf("@");
+    return at > 0 ? rest.slice(0, at) : rest;
+  }
+  return declared;
+}
+
 async function checkNewDependencies() {
   const pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
-  const current = new Set(
-    Object.keys({ ...pkg.dependencies, ...pkg.devDependencies, ...pkg.optionalDependencies }),
-  );
+  const specs = { ...pkg.dependencies, ...pkg.devDependencies, ...pkg.optionalDependencies };
+  const current = new Set(Object.keys(specs));
   const base = baseRef();
   let old = new Set();
   if (base) {
@@ -98,7 +106,7 @@ async function checkNewDependencies() {
     if (!ledger.has(name.toLowerCase())) {
       fail(`new dependency ${name} has no row in docs/dependencies.md`);
     }
-    const encoded = encodeURIComponent(name).replaceAll("%2F", "/");
+    const encoded = encodeURIComponent(registryName(specs[name], name)).replaceAll("%2F", "/");
     let published;
     try {
       const doc = await (
