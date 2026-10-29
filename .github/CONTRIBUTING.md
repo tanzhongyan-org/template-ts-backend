@@ -48,7 +48,8 @@ The notes slice is the pattern. Touch these files in order:
 4. `src/api/routes/notes.ts`: declare the contract with `createRoute`, list `errorResponse(...)` entries for each error status, and write the thin handler.
 5. `src/app.ts`: mount the router, and add `requireIdentity` for the new path.
 6. `src/api/routes/notes.test.ts`: test through `app.request()` at the public route, including the 401 and cross-owner 404 cases.
-7. `ARCHITECTURE.md` and `docs/dependencies.md`: update the code map and add a ledger row for any new dependency.
+7. Run `make openapi` so the committed spec and client include the new route.
+8. `ARCHITECTURE.md` and `docs/dependencies.md`: update the code map and add a ledger row for any new dependency.
 
 A new directory under `src/` needs an ADR in `docs/decisions/` and an entry in `scripts/repo-policy.json` `layout.allow`, in the same pull request.
 

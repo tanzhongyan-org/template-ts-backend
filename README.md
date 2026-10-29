@@ -36,11 +36,11 @@ You should see `[]`. Open `http://localhost:3000/reference` for the interactive 
 
 ## What you get
 
-- Hono routes defined with `createRoute`, so request and response schemas produce the OpenAPI document at `/doc`.
+- Hono routes defined with `createRoute`, so request and response schemas produce the OpenAPI document at `/doc`. The contract is committed at `openapi/openapi.json` with a generated typed client, and `make spec-diff` fails on drift.
 - Zod 4 validation and a typed, validated config module.
 - Drizzle ORM on Postgres, with a notes example slice that scopes every query to its owner.
 - One error envelope for every failure: `{"error": {"message": "...", "status": 404}}`.
-- Fail-closed identity: requests without a trusted `x-user-id` header get a 401.
+- Fail-closed identity: requests without a trusted `x-user-id` header get a 401. Set `JWKS_URL` to validate product JWTs instead.
 - A request body size limit and server timeouts.
 - Six verification gates behind `make check`, plus git hooks, CI, CodeQL, secret scanning and scheduled API fuzzing.
 
@@ -69,9 +69,12 @@ Copy `.env.example` to `.env`. Bun loads it on start.
 | `POSTGRES_PORT` | No | `5432` | Host port Docker Compose publishes Postgres on. Change it when 5432 is taken. |
 | `TRUST_IDENTITY_HEADER` | No | `false` | When `true`, the `x-user-id` header identifies the caller. When `false`, `/notes` returns 401 for every request. |
 | `MAX_BODY_BYTES` | No | `1048576` | Largest accepted request body. Larger bodies get a 413. |
+| `JWKS_URL` | No | — | JWKS endpoint of the product's auth server. When set, protected routes validate Bearer JWTs instead of trusting the header. |
+| `JWT_ISSUER` | No | — | Expected `iss` claim. Checked only when set. |
+| `JWT_AUDIENCE` | No | — | Expected `aud` claim. Checked only when set. |
 
 > [!WARNING]
-> `TRUST_IDENTITY_HEADER=true` lets any client choose its identity. Use it for local work and tests only, and replace it with real authentication before you deploy.
+> `TRUST_IDENTITY_HEADER=true` lets any client choose its identity. Use it for local work and tests only, and replace it with real authentication before you deploy. The server refuses to boot in production while it is set.
 
 ## Commands
 
@@ -93,6 +96,10 @@ Copy `.env.example` to `.env`. Bun loads it on start.
 | `make verify` | Runs the fast gates: typecheck, lint, slop, policy. No database. |
 | `make check` | Runs `make verify`, then tests, dead code and duplication. CI runs this. |
 | `make audit` | Checks dependencies for known vulnerabilities. |
+| `make licenses` | Fails banned or unknown licences in production dependencies and rewrites `NOTICE`. |
+| `make security` | Runs the new-dependency check, gitleaks and osv-scanner. |
+| `make openapi` | Exports `openapi/openapi.json` from the routes and regenerates the typed client. |
+| `make spec-diff` | Fails when the committed spec or client differs from the routes. Runs inside `make check`. |
 | `make workflows` | Lints GitHub workflows with zizmor. Needs `uv`. |
 | `make dast` | Fuzzes a running server with Schemathesis. Needs `uv`. |
 | `make template-debt` | Lists `TEMPLATE-TODO` markers. |
@@ -102,6 +109,7 @@ Copy `.env.example` to `.env`. Bun loads it on start.
 | Path | Purpose |
 | --- | --- |
 | `src/` | Application code. See [ARCHITECTURE.md](ARCHITECTURE.md). |
+| `openapi/` | Committed OpenAPI spec and generated TypeScript client. |
 | `drizzle/` | Generated SQL migrations. |
 | `docs/` | Decisions, specs and the dependency ledger. See [docs/README.md](docs/README.md). |
 | `scripts/` | Policy checker and agent hook. |

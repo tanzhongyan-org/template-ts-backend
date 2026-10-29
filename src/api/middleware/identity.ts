@@ -3,7 +3,8 @@ import { respondError } from "../errors.js";
 
 export type IdentityEnv = { Variables: { ownerId: string } };
 
-const MAX_OWNER_ID_LENGTH = 256; // matches notes.owner_id varchar(256)
+// matches notes.owner_id varchar(256)
+export const MAX_OWNER_ID_LENGTH = 256;
 
 /**
  * Resolves the caller and stores it as `ownerId`.

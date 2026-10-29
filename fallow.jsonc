@@ -1,6 +1,12 @@
 {
   "$schema": "https://raw.githubusercontent.com/fallow-rs/fallow/main/schema.json",
-  "ignorePatterns": ["**/dist/**", "**/build/**", "**/node_modules/**", "**/coverage/**"],
+  "ignorePatterns": [
+    "**/dist/**",
+    "**/build/**",
+    "**/node_modules/**",
+    "**/coverage/**",
+    "openapi/client/**"
+  ],
   "duplicates": {
     "minTokens": 50,
     "minLines": 10,
