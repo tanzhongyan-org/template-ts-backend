@@ -39,4 +39,4 @@ Run `make check` before you claim a task is done. Run `make verify` for a fast p
 5. Gate 5, duplication: `make dupes` (fallow)
 6. Gate 6, anti-slop: `make slop` (ast-grep scan and rule tests)
 
-`make policy` also runs inside both commands.
+`make policy` also runs inside both commands. CI additionally runs `make licenses` and `make security`.

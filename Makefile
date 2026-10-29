@@ -7,8 +7,12 @@ ZIZMOR_ARGS ?= --offline
 ZIZMOR_VERSION := 1.31.1
 # renovate: datasource=pypi depName=schemathesis
 SCHEMATHESIS_VERSION := 4.32.6
+# renovate: datasource=github-releases depName=gitleaks/gitleaks extractVersion=^v(?<version>.*)$
+GITLEAKS_VERSION := 8.30.1
+# renovate: datasource=github-releases depName=google/osv-scanner extractVersion=^v(?<version>.*)$
+OSV_SCANNER_VERSION := 2.7.0
 
-.PHONY: setup up down dev dev-node build db-push test lint fix fmt typecheck deadcode dupes slop policy verify check audit workflows dast template-debt
+.PHONY: setup up down dev dev-node build db-push test lint fix fmt typecheck deadcode dupes slop policy verify check audit workflows dast template-debt licenses security
 
 setup:
 	bun install --frozen-lockfile
@@ -71,6 +75,12 @@ check: verify test deadcode dupes
 
 audit:
 	bun audit
+
+licenses:
+	node scripts/licenses.mjs
+
+security:
+	GITLEAKS_VERSION=$(GITLEAKS_VERSION) OSV_SCANNER_VERSION=$(OSV_SCANNER_VERSION) node scripts/security.mjs
 
 workflows:
 	uvx zizmor@$(ZIZMOR_VERSION) $(ZIZMOR_ARGS) --min-severity medium .github/workflows

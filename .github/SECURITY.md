@@ -23,7 +23,9 @@ Only the `main` branch receives security fixes.
 | --- | --- | --- |
 | Static analysis | Biome recommended rules, ast-grep rules | `make lint`, `make slop` |
 | Static analysis, cross-language | CodeQL with `security-extended` queries, JavaScript/TypeScript and GitHub Actions | Push, pull request, weekly |
-| Secrets | gitleaks over full history; staged scan in the pre-commit hook | CI, commit |
+| Secrets | gitleaks over full history (`make security`); staged scan in the pre-commit hook | CI, commit |
 | Dependencies | `bun audit`; dependency review on pull requests | CI |
+| Supply chain | osv-scanner and the new-dependency check: a new dependency must exist on the registry, be at least 14 days old and have a ledger row (`make security`) | CI |
+| Licences | `make licenses` fails banned and unknown licences and rewrites `NOTICE` | CI |
 | Workflows | zizmor | CI |
 | Dynamic testing | Schemathesis against the OpenAPI document | Weekly, manual |

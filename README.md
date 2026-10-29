@@ -96,6 +96,8 @@ Copy `.env.example` to `.env`. Bun loads it on start.
 | `make verify` | Runs the fast gates: typecheck, lint, slop, policy. No database. |
 | `make check` | Runs `make verify`, then tests, dead code and duplication. CI runs this. |
 | `make audit` | Checks dependencies for known vulnerabilities. |
+| `make licenses` | Fails banned or unknown licences in production dependencies and rewrites `NOTICE`. |
+| `make security` | Runs the new-dependency check, gitleaks and osv-scanner. |
 | `make workflows` | Lints GitHub workflows with zizmor. Needs `uv`. |
 | `make dast` | Fuzzes a running server with Schemathesis. Needs `uv`. |
 | `make template-debt` | Lists `TEMPLATE-TODO` markers. |

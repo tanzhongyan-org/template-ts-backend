@@ -39,3 +39,4 @@ One row per direct dependency in `package.json`. `make policy` fails when a depe
 | --- | --- | --- | --- |
 | esbuild | `^0.28.2` | `drizzle-kit` pulls `esbuild` 0.18.20, which allows any website to read dev server responses (GHSA-67mh-4wv8-2f99) | 2027-01-31 |
 | katex | `^0.18.2` | `markdownlint-cli2` pulls a `katex` with a prototype pollution bug (GHSA-238p-pmpm-9mq7) | 2027-01-31 |
+| re2js | `^2.8.7` | osv-scanner flags `re2js` 2.8.6 (GHSA-gg6h-894w-4m9c); fixed in 2.8.7 | 2027-01-31 |
