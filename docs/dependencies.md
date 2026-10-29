@@ -7,6 +7,7 @@ One row per direct dependency in `package.json`. `make policy` fails when a depe
 | Dependency | Purpose | Why the default was not enough | Replaced |
 | --- | --- | --- | --- |
 | `hono` | HTTP router and middleware | Bun and Node.js have no routing, middleware or body limit primitives | Hand-written `fetch` dispatch |
+| `jose` | Verifies product JWTs against the JWKS | Key fetching, caching and claim checks need hand-building on raw `crypto` | Nothing |
 | `@hono/zod-openapi` | `createRoute` contracts that validate requests and emit OpenAPI | A separate OpenAPI file drifts from the handlers | Hand-maintained OpenAPI YAML |
 | `@hono/node-server` | Runs the Hono app on Node.js | Node.js does not speak the `fetch` handler interface | Nothing; Bun needs no adapter |
 | `@scalar/hono-api-reference` | Interactive API reference page | Reading raw OpenAPI JSON is slow for new readers | Swagger UI |

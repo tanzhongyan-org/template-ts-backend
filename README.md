@@ -40,7 +40,7 @@ You should see `[]`. Open `http://localhost:3000/reference` for the interactive 
 - Zod 4 validation and a typed, validated config module.
 - Drizzle ORM on Postgres, with a notes example slice that scopes every query to its owner.
 - One error envelope for every failure: `{"error": {"message": "...", "status": 404}}`.
-- Fail-closed identity: requests without a trusted `x-user-id` header get a 401.
+- Fail-closed identity: requests without a trusted `x-user-id` header get a 401. Set `JWKS_URL` to validate product JWTs instead.
 - A request body size limit and server timeouts.
 - Six verification gates behind `make check`, plus git hooks, CI, CodeQL, secret scanning and scheduled API fuzzing.
 
@@ -69,9 +69,12 @@ Copy `.env.example` to `.env`. Bun loads it on start.
 | `POSTGRES_PORT` | No | `5432` | Host port Docker Compose publishes Postgres on. Change it when 5432 is taken. |
 | `TRUST_IDENTITY_HEADER` | No | `false` | When `true`, the `x-user-id` header identifies the caller. When `false`, `/notes` returns 401 for every request. |
 | `MAX_BODY_BYTES` | No | `1048576` | Largest accepted request body. Larger bodies get a 413. |
+| `JWKS_URL` | No | — | JWKS endpoint of the product's auth server. When set, protected routes validate Bearer JWTs instead of trusting the header. |
+| `JWT_ISSUER` | No | — | Expected `iss` claim. Checked only when set. |
+| `JWT_AUDIENCE` | No | — | Expected `aud` claim. Checked only when set. |
 
 > [!WARNING]
-> `TRUST_IDENTITY_HEADER=true` lets any client choose its identity. Use it for local work and tests only, and replace it with real authentication before you deploy.
+> `TRUST_IDENTITY_HEADER=true` lets any client choose its identity. Use it for local work and tests only, and replace it with real authentication before you deploy. The server refuses to boot in production while it is set.
 
 ## Commands
 

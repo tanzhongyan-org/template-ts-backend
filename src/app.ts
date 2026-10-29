@@ -5,6 +5,7 @@ import { HTTPException } from "hono/http-exception";
 import { respondError } from "./api/errors.js";
 import { requireIdentity } from "./api/middleware/identity.js";
 import { requireJsonBody } from "./api/middleware/json-body.js";
+import { type JwtOptions, requireJwt } from "./api/middleware/jwt.js";
 import { healthRouter } from "./api/routes/health.js";
 import { notesRouter } from "./api/routes/notes.js";
 import { allowedMethods } from "./api/routing.js";
@@ -13,11 +14,18 @@ import { config } from "./core/config.js";
 export type AppOptions = {
   trustIdentityHeader?: boolean;
   maxBodyBytes?: number;
+  /** When set, protected routes validate Bearer JWTs instead of trusting the header. */
+  jwt?: JwtOptions;
 };
 
 export function createApp(options: AppOptions = {}) {
   const trustHeader = options.trustIdentityHeader ?? config.TRUST_IDENTITY_HEADER;
   const maxBodyBytes = options.maxBodyBytes ?? config.MAX_BODY_BYTES;
+  const jwtOptions =
+    options.jwt ??
+    (config.JWKS_URL
+      ? { jwksUrl: config.JWKS_URL, issuer: config.JWT_ISSUER, audience: config.JWT_AUDIENCE }
+      : undefined);
 
   const app = new OpenAPIHono({
     defaultHook: (result, c) => {
@@ -35,7 +43,7 @@ export function createApp(options: AppOptions = {}) {
       onError: (c) => respondError(c, 413, "Request body too large"),
     }),
   );
-  app.use("/notes/*", requireIdentity({ trustHeader }));
+  app.use("/notes/*", jwtOptions ? requireJwt(jwtOptions) : requireIdentity({ trustHeader }));
   app.post("/notes", requireJsonBody);
   app.patch("/notes/:id", requireJsonBody);
 

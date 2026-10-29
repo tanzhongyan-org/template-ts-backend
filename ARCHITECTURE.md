@@ -27,6 +27,7 @@ Reuse these before you write something similar.
 | `src/app.ts` | `createApp` wires middleware, routes, `/doc`, `/reference` and the 404 and 500 handlers. | Add new route groups here. |
 | `src/api/errors.ts` | The error envelope. | `respondError` writes any error. `errorResponse` declares an error in a route's `responses`. |
 | `src/api/middleware/identity.ts` | Resolves the caller or returns 401. | `requireIdentity` guards a route group; read the caller with `c.get("ownerId")`. |
+| `src/api/middleware/jwt.ts` | Validates Bearer JWTs against the product's JWKS. | `requireJwt` guards a route group when `JWKS_URL` is set; `sub` becomes `ownerId`. |
 | `src/api/routes/<feature>.ts` | Thin handlers and `createRoute` contracts. | `notes.ts` is the pattern; `toNoteResponse` maps a row to JSON. |
 | `src/domain/<feature>/schema.ts` | Drizzle table. | — |
 | `src/domain/<feature>/schemas.ts` | Zod request and response schemas. | Derive types with `z.infer`. |
@@ -47,6 +48,7 @@ Reuse these before you write something similar.
 - The Postgres image tag is the same in `compose.yaml` and the workflows. [enforced by `make policy`]
 - Every `/notes` query filters by the caller's `ownerId`. [enforced by tests]
 - Requests without a trusted identity get 401. [enforced by tests]
+- Bearer tokens are verified against the configured JWKS, including issuer, audience and expiry. [enforced by tests]
 - Every error body is the shared envelope. [enforced by tests]
 - Routes declare request and response schemas with `createRoute`. [review-only]
 - Handlers contain no business logic. [review-only]
@@ -57,7 +59,7 @@ Reuse these before you write something similar.
 | --- | --- |
 | Config | `src/core/config.ts` parses the environment with Zod at startup and exports a typed `config`. A bad value stops the process. |
 | Errors | `respondError` returns `{"error": {"message", "status", "details?"}}`. Validation failures use 422 with Zod issues in `details`. Unexpected errors log server-side and return `Internal Server Error`. |
-| Auth | `requireIdentity` reads `x-user-id` only when `TRUST_IDENTITY_HEADER` is `true`. It returns 401 otherwise. The header is a stand-in for real authentication. |
+| Auth | `requireIdentity` reads `x-user-id` only when `TRUST_IDENTITY_HEADER` is `true`. It returns 401 otherwise. The header is a stand-in for real authentication. When `JWKS_URL` is set, `requireJwt` validates Bearer tokens instead and the env schema still refuses the dev flag in production. |
 | Limits | `bodyLimit` rejects bodies over `MAX_BODY_BYTES` with 413. Both entry points set server timeouts. |
 | Logging | Handlers log with `console`; unexpected errors are logged once in the 500 handler. |
 | Database | `src/core/database.ts` opens one connection pool. Services use the Drizzle query builder, so values are always parameterized. |

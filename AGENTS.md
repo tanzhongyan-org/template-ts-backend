@@ -24,7 +24,7 @@ This is the only agent instruction file. Claude Code, Codex, Cursor, Copilot and
 - `process.env` is read only in `src/core/config.ts` [enforced by ast-grep].
 - Routes use `createRoute` with request and response schemas, including error statuses [review-only].
 - Errors go through `respondError`; never hand-write an error body [enforced by tests].
-- Caller identity comes from `requireIdentity`; there is no default owner [enforced by tests].
+- Caller identity comes from `requireIdentity`, or from `requireJwt` when `JWKS_URL` is set; there is no default owner [enforced by tests].
 - Tests call `app.request()` in memory; they do not open network ports [enforced by test runner].
 - Mark anything a derived repo must change with `TEMPLATE-TODO(<area>): <what>`.
 

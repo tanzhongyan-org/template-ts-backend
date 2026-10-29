@@ -17,6 +17,11 @@ export const envSchema = z
     // Honours the x-user-id header as the caller identity. Leave false until real
     // authentication replaces the header stub (see src/api/middleware/identity.ts).
     TRUST_IDENTITY_HEADER: booleanFlag,
+    // JWKS endpoint of the product's auth server (Better Auth jwt plugin). When set,
+    // protected routes validate Bearer JWTs instead of trusting the x-user-id header.
+    JWKS_URL: z.string().url().optional(),
+    JWT_ISSUER: z.string().min(1).optional(),
+    JWT_AUDIENCE: z.string().min(1).optional(),
     // Largest accepted request body in bytes; larger bodies get a 413 response.
     MAX_BODY_BYTES: z.coerce.number().int().positive().default(1_048_576),
   })
