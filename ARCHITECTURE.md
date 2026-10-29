@@ -35,6 +35,9 @@ Reuse these before you write something similar.
 | `src/core/config.ts` | The only reader of `process.env`. | Add a variable to the schema and to `.env.example`. |
 | `src/core/database.ts` | Postgres client and Drizzle instance. | Import `db`. |
 | `drizzle/` | Generated migrations. | — |
+| `openapi/openapi.json` | The committed API contract. | Regenerate with `make openapi` after any route change. |
+| `openapi/client/` | Generated typed client. | Import it in API consumers; never edit it by hand. |
+| `scripts/openapi.mjs` | Spec export, client generation and the spec-diff check. | Run through `make openapi` and `make spec-diff`. |
 | `scripts/repo-policy.mjs` | Layout, docs, ledger and drift checks. | Configure it in `scripts/repo-policy.json`. |
 | `scripts/agent-hook.mjs` | Format and verify hooks for coding agents. | — |
 | `.ast-grep/rules/` | Anti-slop and boundary rules. | Add a rule and a test in `.ast-grep/tests/`. |
@@ -51,6 +54,7 @@ Reuse these before you write something similar.
 - Bearer tokens are verified against the configured JWKS, including issuer, audience and expiry. [enforced by tests]
 - Every error body is the shared envelope. [enforced by tests]
 - Routes declare request and response schemas with `createRoute`. [review-only]
+- The committed OpenAPI spec and client match the routes. [enforced by `make spec-diff`]
 - Handlers contain no business logic. [review-only]
 
 ## Cross-cutting concerns

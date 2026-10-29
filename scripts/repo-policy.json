@@ -8,6 +8,7 @@
       ".github",
       "docs",
       "drizzle",
+      "openapi",
       "scripts",
       "src"
     ],

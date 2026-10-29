@@ -12,7 +12,7 @@ GITLEAKS_VERSION := 8.30.1
 # renovate: datasource=github-releases depName=google/osv-scanner extractVersion=^v(?<version>.*)$
 OSV_SCANNER_VERSION := 2.7.0
 
-.PHONY: setup up down dev dev-node build db-push test lint fix fmt typecheck deadcode dupes slop policy verify check audit workflows dast template-debt licenses security
+.PHONY: setup up down dev dev-node build db-push test lint fix fmt typecheck deadcode dupes slop policy verify check audit workflows dast template-debt licenses security openapi spec-diff
 
 setup:
 	bun install --frozen-lockfile
@@ -71,7 +71,7 @@ policy:
 verify: typecheck lint slop policy
 
 # Full gate set. CI runs this.
-check: verify test deadcode dupes
+check: verify test deadcode dupes spec-diff
 
 audit:
 	bun audit
@@ -81,6 +81,12 @@ licenses:
 
 security:
 	GITLEAKS_VERSION=$(GITLEAKS_VERSION) OSV_SCANNER_VERSION=$(OSV_SCANNER_VERSION) node scripts/security.mjs
+
+openapi:
+	bun scripts/openapi.mjs
+
+spec-diff:
+	bun scripts/openapi.mjs --check
 
 workflows:
 	uvx zizmor@$(ZIZMOR_VERSION) $(ZIZMOR_ARGS) --min-severity medium .github/workflows

@@ -36,7 +36,7 @@ You should see `[]`. Open `http://localhost:3000/reference` for the interactive 
 
 ## What you get
 
-- Hono routes defined with `createRoute`, so request and response schemas produce the OpenAPI document at `/doc`.
+- Hono routes defined with `createRoute`, so request and response schemas produce the OpenAPI document at `/doc`. The contract is committed at `openapi/openapi.json` with a generated typed client, and `make spec-diff` fails on drift.
 - Zod 4 validation and a typed, validated config module.
 - Drizzle ORM on Postgres, with a notes example slice that scopes every query to its owner.
 - One error envelope for every failure: `{"error": {"message": "...", "status": 404}}`.
@@ -98,6 +98,8 @@ Copy `.env.example` to `.env`. Bun loads it on start.
 | `make audit` | Checks dependencies for known vulnerabilities. |
 | `make licenses` | Fails banned or unknown licences in production dependencies and rewrites `NOTICE`. |
 | `make security` | Runs the new-dependency check, gitleaks and osv-scanner. |
+| `make openapi` | Exports `openapi/openapi.json` from the routes and regenerates the typed client. |
+| `make spec-diff` | Fails when the committed spec or client differs from the routes. Runs inside `make check`. |
 | `make workflows` | Lints GitHub workflows with zizmor. Needs `uv`. |
 | `make dast` | Fuzzes a running server with Schemathesis. Needs `uv`. |
 | `make template-debt` | Lists `TEMPLATE-TODO` markers. |
@@ -107,6 +109,7 @@ Copy `.env.example` to `.env`. Bun loads it on start.
 | Path | Purpose |
 | --- | --- |
 | `src/` | Application code. See [ARCHITECTURE.md](ARCHITECTURE.md). |
+| `openapi/` | Committed OpenAPI spec and generated TypeScript client. |
 | `drizzle/` | Generated SQL migrations. |
 | `docs/` | Decisions, specs and the dependency ledger. See [docs/README.md](docs/README.md). |
 | `scripts/` | Policy checker and agent hook. |
