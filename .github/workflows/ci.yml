@@ -6,144 +6,16 @@ on:
   pull_request:
     branches: [main]
 
-permissions: {}
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
-
-env:
-  DATABASE_URL: postgresql://postgres:postgres@localhost:5432/template_ts_backend
-  TRUST_IDENTITY_HEADER: "true"
+permissions:
+  contents: read
+  pull-requests: read
 
 jobs:
-  gates:
-    name: gates
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    permissions:
-      contents: read
-    services:
-      postgres:
-        image: postgres:18-alpine
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: template_ts_backend
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 5
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-
-      - name: Set up Bun
-        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
-        with:
-          bun-version-file: package.json
-
-      - name: Install dependencies
-        run: bun install --frozen-lockfile
-
-      - name: Apply database schema
-        run: make db-push
-
-      - name: Run verification gates
-        run: make check
-
-  security:
-    name: security
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    permissions:
-      contents: read
-    env:
-      # renovate: datasource=github-releases depName=gitleaks/gitleaks extractVersion=^v(?<version>.*)$
-      GITLEAKS_VERSION: "8.30.1"
-      # Checksum of gitleaks_<version>_linux_x64.tar.gz from the release's checksums file; update with the version.
-      GITLEAKS_SHA256: "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb"
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-
-      - name: Install gitleaks
-        run: |
-          curl -sSfL -o gitleaks.tar.gz "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
-          echo "${GITLEAKS_SHA256}  gitleaks.tar.gz" | sha256sum --check --quiet -
-          tar -xzf gitleaks.tar.gz gitleaks
-
-      - name: Scan history for secrets
-        run: ./gitleaks git --redact --no-banner --exit-code 1
-
-      - name: Set up Bun
-        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
-        with:
-          bun-version-file: package.json
-
-      - name: Audit dependencies
-        run: make audit
-
-      - name: Set up uv
-        uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
-
-      - name: Lint workflows
-        run: make workflows ZIZMOR_ARGS=
-        env:
-          GH_TOKEN: ${{ github.token }}
-
-  dependency-review:
-    name: dependency-review
-    if: github.event_name == 'pull_request' && (!github.event.repository.private || vars.ENABLE_CODE_SECURITY == 'true')
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - name: Probe the Dependency graph
-        id: probe
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          if gh api "repos/${GITHUB_REPOSITORY}/dependency-graph/sbom" --silent; then
-            echo "enabled=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "enabled=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::Dependency graph is off; enable it in Settings > Code security to run dependency review."
-          fi
-
-      - name: Review dependency changes
-        if: steps.probe.outputs.enabled == 'true'
-        uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
-        with:
-          fail-on-severity: high
-
-  ci-passed:
-    name: ci-passed
-    if: always()
-    needs: [gates, security, dependency-review]
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    permissions: {}
-    steps:
-      - name: Require every job to succeed or be skipped
-        env:
-          RESULTS: ${{ join(needs.*.result, ' ') }}
-        run: |
-          for result in $RESULTS; do
-            if [ "$result" != "success" ] && [ "$result" != "skipped" ]; then
-              echo "A required job finished with: $result"
-              exit 1
-            fi
-          done
+  ci:
+    uses: tanzhongyan-org/.github/.github/workflows/ci.yml@0c54f703d2d0d24b6ec61c8ea0f0d1a7d220f3e9 # v1
+    with:
+      runtime: ts-backend
+      postgres-db: template_ts_backend
+      database-url: postgresql://postgres:password@localhost:5432/template_ts_backend
+      install-command: bun install --frozen-lockfile
+      db-setup-command: make db-push
