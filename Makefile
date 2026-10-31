@@ -37,7 +37,7 @@ db-push:
 	$(BIN)/drizzle-kit push
 
 test:
-	$(BIN)/vitest run
+	$(BIN)/vitest run --coverage
 
 typecheck:
 	$(BIN)/tsc --noEmit

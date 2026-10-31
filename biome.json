@@ -12,6 +12,7 @@
       "!**/node_modules",
       "!**/dist",
       "!**/coverage",
+      "!**/.worktrees",
       "!**/*.md",
       "!openapi",
       "!scripts/repo-policy.mjs"

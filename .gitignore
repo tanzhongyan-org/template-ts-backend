@@ -9,6 +9,7 @@ build/
 
 # Testing & Coverage
 coverage/
+/.worktrees/
 .vitest/
 
 # Environment files
