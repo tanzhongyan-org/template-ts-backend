@@ -7,5 +7,5 @@
   },
   "noBanner": true,
   "globs": ["**/*.md"],
-  "ignores": [".github/pull_request_template.md", "node_modules/**", ".agents/**"]
+  "ignores": [".github/pull_request_template.md", "node_modules/**", ".agents/**", ".worktrees/**"]
 }

@@ -22,6 +22,7 @@ One row per direct dependency in `package.json`. `make policy` fails when a depe
 | `typescript` | Typecheck gate | Runtimes strip types without checking them | Nothing |
 | `@types/node` | Node.js types for `process` and the Node.js entry point | Needed by the compiler | Nothing |
 | `vitest` | Test runner | `bun test` does not run on the Node.js fallback | Jest |
+| `@vitest/coverage-v8` | Coverage floor for `make test` | Vitest has no built-in coverage provider | Nothing |
 | `@biomejs/biome` | Format and lint | One tool instead of ESLint plus Prettier | ESLint, Prettier |
 | `drizzle-kit` | Schema push and migration generation | Drizzle ORM does not apply schemas | Hand-written SQL |
 | `tsx` | Runs TypeScript on Node.js in watch mode | Node.js 22 cannot run `.ts` files | `ts-node` |

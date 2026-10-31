@@ -5,6 +5,7 @@
     "**/build/**",
     "**/node_modules/**",
     "**/coverage/**",
+    "**/.worktrees/**",
     "openapi/client/**"
   ],
   "duplicates": {

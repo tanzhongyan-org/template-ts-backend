@@ -23,7 +23,7 @@
     ]
   },
   "docs": {
-    "exclude": ["docs/plans/**", "docs/specs/**", "docs/archive/**", ".agents/**"],
+    "exclude": ["docs/plans/**", "docs/specs/**", "docs/archive/**", ".agents/**", ".worktrees/**"],
     "externalPrefixes": ["workflow/", "shared/"],
     "ignorePaths": ["dist", "dist/**"],
     "envExample": ".env.example",
