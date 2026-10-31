@@ -6,7 +6,7 @@ ZIZMOR_ARGS ?= --offline
 # renovate: datasource=pypi depName=zizmor
 ZIZMOR_VERSION := 1.31.1
 # renovate: datasource=pypi depName=schemathesis
-SCHEMATHESIS_VERSION := 4.32.6
+SCHEMATHESIS_VERSION := 4.32.7
 # renovate: datasource=github-releases depName=gitleaks/gitleaks extractVersion=^v(?<version>.*)$
 GITLEAKS_VERSION := 8.30.1
 # renovate: datasource=github-releases depName=google/osv-scanner extractVersion=^v(?<version>.*)$
