@@ -10,7 +10,7 @@ SCHEMATHESIS_VERSION := 4.33.1
 # renovate: datasource=github-releases depName=gitleaks/gitleaks extractVersion=^v(?<version>.*)$
 GITLEAKS_VERSION := 8.30.1
 # renovate: datasource=github-releases depName=google/osv-scanner extractVersion=^v(?<version>.*)$
-OSV_SCANNER_VERSION := 2.7.0
+OSV_SCANNER_VERSION := 2.7.1
 
 .PHONY: setup up down dev dev-node build db-push test lint fix fmt typecheck deadcode dupes slop policy verify check audit workflows dast template-debt licenses security openapi spec-diff
 
