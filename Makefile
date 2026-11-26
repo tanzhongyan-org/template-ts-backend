@@ -4,9 +4,9 @@ BASE_URL ?= http://localhost:3000
 ZIZMOR_ARGS ?= --offline
 
 # renovate: datasource=pypi depName=zizmor
-ZIZMOR_VERSION := 1.32.0
+ZIZMOR_VERSION := 1.33.1
 # renovate: datasource=pypi depName=schemathesis
-SCHEMATHESIS_VERSION := 4.33.2
+SCHEMATHESIS_VERSION := 4.34.2
 # renovate: datasource=github-releases depName=gitleaks/gitleaks extractVersion=^v(?<version>.*)$
 GITLEAKS_VERSION := 8.30.1
 # renovate: datasource=github-releases depName=google/osv-scanner extractVersion=^v(?<version>.*)$
