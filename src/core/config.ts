@@ -31,4 +31,15 @@ export const envSchema = z
 
 export type EnvConfig = z.infer<typeof envSchema>;
 
-export const config: EnvConfig = envSchema.parse(process.env);
+export const config: EnvConfig = envSchema.parse({
+  NODE_ENV: process.env.NODE_ENV,
+  PORT: process.env.PORT,
+  APP_NAME: process.env.APP_NAME,
+  APP_VERSION: process.env.APP_VERSION,
+  DATABASE_URL: process.env.DATABASE_URL,
+  TRUST_IDENTITY_HEADER: process.env.TRUST_IDENTITY_HEADER,
+  JWKS_URL: process.env.JWKS_URL,
+  JWT_ISSUER: process.env.JWT_ISSUER,
+  JWT_AUDIENCE: process.env.JWT_AUDIENCE,
+  MAX_BODY_BYTES: process.env.MAX_BODY_BYTES,
+});
